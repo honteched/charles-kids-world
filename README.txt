@@ -1,4 +1,4 @@
-IGIDIGBO KIDS WORLD — Games, Stories & Cartoons for Curious Kids
+CHARLES KIDS WORLD — Games, Stories & Cartoons for Curious Kids
 ==================================================================
 
 WHAT'S INSIDE
