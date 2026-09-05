@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>Games Zone — Igidigbo Kids World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#6EC6FF; --sky-bottom:#CDEEFF; --grass:#7BD389; --grass-dark:#5FB86A;
+    --ink:#2B2350; --ink-soft:#655D8A; --card-white:#FFFFFF;
+    --amber:#FFC94A; --amber-dark:#FF9F45; --coral:#FF7AB6; --coral-dark:#FF5C8D;
+    --teal:#3FBFB0; --teal-dark:#2E9E91; --grape:#A66BD1; --grape-dark:#7A4FB5;
+    --leaf:#5FB86A; --leaf-dark:#3F8F52; --tomato:#FF7A6E; --tomato-dark:#E4503F;
+    --sun:#FFD166; --sky:#4FA8FF; --skyd:#3457C7; --shadow-ink:43,35,80;
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+  }
+  html,body{ height:100%; }
+  body{
+    margin:0; min-height:100%; font-family:'Nunito',sans-serif; color:var(--ink);
+    background:
+      radial-gradient(120px 120px at 88% 6%, rgba(255,209,102,0.9), rgba(255,209,102,0) 70%),
+      linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-bottom) 62%, var(--grass) 62%, var(--grass-dark) 100%);
+    background-attachment:fixed; overflow-x:hidden;
+  }
+  button{ font-family:inherit; }
+  .hidden{ display:none !important; }
+
+  .scenery{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .hill{ position:absolute; bottom:-6%; width:60%; height:22%; border-radius:50%; opacity:0.55; }
+  .hill.h1{ left:-10%; background:var(--grass-dark); }
+  .hill.h2{ right:-15%; width:70%; height:26%; background:#4FA85E; opacity:0.4; }
+  .cloud{ position:absolute; background:#fff; opacity:0.85; border-radius:50px; }
+  .cloud::before,.cloud::after{ content:''; position:absolute; background:inherit; border-radius:50%; }
+  .cloud.c1{ width:70px; height:26px; top:8%; left:8%; }
+  .cloud.c1::before{ width:40px; height:40px; top:-18px; left:8px; }
+  .cloud.c1::after{ width:30px; height:30px; top:-12px; left:34px; }
+  .cloud.c2{ width:56px; height:20px; top:16%; left:70%; }
+  .cloud.c2::before{ width:32px; height:32px; top:-14px; left:6px; }
+  .cloud.c2::after{ width:24px; height:24px; top:-9px; left:26px; }
+
+  #app{ position:relative; z-index:1; min-height:100%; display:flex; flex-direction:column; }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px; gap:10px; }
+  .topbar-left{ display:flex; align-items:center; gap:10px; }
+  .icon-btn{
+    border:none; background:rgba(255,255,255,0.85); color:var(--ink); width:44px; height:44px; border-radius:16px;
+    font-size:20px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+    box-shadow:0 4px 0 rgba(var(--shadow-ink),0.12);
+  }
+  .icon-btn:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(var(--shadow-ink),0.12); }
+  .back-btn{
+    display:flex; align-items:center; gap:6px; border:none; cursor:pointer; background:rgba(255,255,255,0.85);
+    color:var(--ink); font-family:'Fredoka',sans-serif; font-weight:600; font-size:15px;
+    padding:10px 16px 10px 12px; border-radius:16px; box-shadow:0 4px 0 rgba(var(--shadow-ink),0.12);
+  }
+  .back-btn:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(var(--shadow-ink),0.12); }
+  .star-pill{
+    display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.85); padding:9px 14px; border-radius:16px;
+    font-family:'Fredoka',sans-serif; font-weight:600; font-size:15px; box-shadow:0 4px 0 rgba(var(--shadow-ink),0.12);
+  }
+
+  main{ flex:1; display:flex; flex-direction:column; padding:0 18px 20px; }
+
+  .hero{ text-align:center; padding:18px 8px 6px; }
+  .hero h1{ font-family:'Fredoka',sans-serif; font-weight:700; font-size:42px; margin:0; color:var(--ink); }
+  .hero p{ margin:8px auto 0; max-width:460px; color:var(--ink-soft); font-size:15.5px; font-weight:600; }
+
+  /* category picker */
+  .category-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:22px; max-width:820px; margin:26px auto 0; width:100%; }
+  @media (max-width:640px){ .category-grid{ grid-template-columns:1fr; max-width:380px; } }
+  .category-card{
+    border:none; cursor:pointer; text-align:left; padding:0; border-radius:28px; overflow:hidden; background:#fff;
+    box-shadow:0 14px 0 -6px rgba(var(--shadow-ink),0.12), 0 14px 24px -10px rgba(var(--shadow-ink),0.35);
+    display:flex; flex-direction:column; transition:transform 160ms ease;
+  }
+  .category-card:hover{ transform:translateY(-4px); }
+  .category-card:active{ transform:translateY(1px); }
+  .category-card:focus-visible{ outline:3px solid var(--ink); outline-offset:3px; }
+  .category-top{ height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
+  .category-top .emoji{ font-size:54px; filter:drop-shadow(0 3px 2px rgba(0,0,0,0.18)); }
+  .category-top .age{ font-family:'Fredoka',sans-serif; font-weight:700; color:#fff; font-size:14px; background:rgba(0,0,0,0.2); padding:4px 14px; border-radius:20px; }
+  .category-body{ padding:16px 18px 20px; }
+  .category-body h3{ margin:0 0 6px; font-family:'Fredoka',sans-serif; font-size:21px; }
+  .category-body p{ margin:0 0 8px; color:var(--ink-soft); font-weight:600; font-size:13.5px; line-height:1.4; }
+  .category-body .count{ font-size:13px; font-weight:800; color:var(--ink); opacity:0.7; }
+  .theme-explorer{ background:linear-gradient(135deg, var(--sun), var(--amber-dark)); }
+  .theme-challenge{ background:linear-gradient(135deg, var(--sky), var(--skyd)); }
+  .scores-link{ display:block; margin:20px auto 0; background:none; border:none; cursor:pointer; font-family:'Fredoka',sans-serif; font-weight:600; color:var(--ink); font-size:15px; text-decoration:underline; }
+
+  /* game grid (used inside a category) */
+  .game-grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; max-width:920px; margin:22px auto 0; width:100%; }
+  @media (max-width:820px){ .game-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); } }
+  @media (max-width:520px){ .game-grid{ grid-template-columns:1fr; max-width:360px; } }
+
+  .game-card{
+    border:none; cursor:pointer; text-align:left; padding:0; border-radius:24px; overflow:hidden; background:var(--card-white);
+    display:flex; flex-direction:column; box-shadow:0 12px 0 -6px rgba(var(--shadow-ink),0.12), 0 12px 22px -10px rgba(var(--shadow-ink),0.35);
+    transition:transform 160ms ease;
+  }
+  .game-card:hover{ transform:translateY(-4px) rotate(-0.4deg); }
+  .game-card:active{ transform:translateY(1px); }
+  .game-card:focus-visible{ outline:3px solid var(--ink); outline-offset:3px; }
+  .card-top{ height:92px; display:flex; align-items:center; justify-content:center; font-size:40px; }
+  .card-top span{ filter:drop-shadow(0 3px 2px rgba(0,0,0,0.15)); }
+  .card-body{ padding:12px 14px 16px; }
+  .card-body h3{ margin:0 0 4px; font-family:'Fredoka',sans-serif; font-size:15.5px; font-weight:600; }
+  .card-body p{ margin:0 0 8px; color:var(--ink-soft); font-size:12.5px; font-weight:600; line-height:1.35; }
+  .card-cta{ font-size:12px; font-weight:800; color:var(--ink); opacity:0.7; }
+
+  .theme-abc{ background:linear-gradient(135deg, var(--amber), var(--amber-dark)); }
+  .theme-count{ background:linear-gradient(135deg, var(--coral), var(--coral-dark)); }
+  .theme-shape{ background:linear-gradient(135deg, var(--teal), var(--teal-dark)); }
+  .theme-color{ background:conic-gradient(from 180deg, #FF5C5C, #FFD166, #63C77A, #4FA8FF, #A66BD1, #FF5C5C); }
+  .theme-memory{ background:linear-gradient(135deg, var(--leaf), var(--leaf-dark)); }
+  .theme-math{ background:linear-gradient(135deg, var(--tomato), var(--tomato-dark)); }
+
+  /* game screen */
+  .game-panel{
+    max-width:640px; width:100%; margin:6px auto 0; background:rgba(255,255,255,0.9); border-radius:28px;
+    padding:20px 20px 26px; position:relative; box-shadow:0 16px 30px -14px rgba(var(--shadow-ink),0.4);
+    min-height:440px; display:flex; flex-direction:column;
+  }
+  .game-title-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .game-title-row h2{ font-family:'Fredoka',sans-serif; font-size:21px; margin:0; }
+  .round-info{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+
+  .progress-row{ display:flex; gap:6px; margin:10px 0 16px; flex-wrap:wrap; }
+  .pip{ width:24px; height:24px; border-radius:50%; background:#EDE9F7; display:flex; align-items:center; justify-content:center;
+    font-size:12px; flex:0 0 auto; transition:background 200ms ease, transform 200ms ease; }
+  .pip.done{ background:var(--sun); transform:scale(1.08); }
+
+  .stage{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:6px 0 10px; }
+  .prompt{ font-family:'Fredoka',sans-serif; font-size:18px; text-align:center; max-width:440px; line-height:1.35; }
+
+  .options-row{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; max-width:500px; }
+
+  .option-btn{
+    min-width:78px; min-height:78px; padding:8px; border-radius:18px; border:3px solid #EDE9F7; background:#fff;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:'Fredoka',sans-serif;
+    font-weight:600; transition:border-color 150ms ease, transform 120ms ease;
+  }
+  .option-btn:hover{ border-color:var(--teal); }
+  .option-btn:focus-visible{ outline:3px solid var(--ink); outline-offset:2px; }
+  .option-btn.is-correct{ animation:pop-correct 550ms ease; border-color:var(--leaf-dark); background:#EAFBEC; }
+  .option-btn.is-wrong{ animation:shake-wrong 420ms ease; }
+  @keyframes pop-correct{ 0%{transform:scale(1);} 40%{transform:scale(1.14);} 100%{transform:scale(1);} }
+  @keyframes shake-wrong{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-7px);} 75%{transform:translateX(7px);} }
+
+  .text-opt{ min-width:110px; max-width:220px; padding:14px 16px; font-size:15px; line-height:1.3; text-align:center; white-space:normal; }
+
+  .typing-target{ font-family:'Fredoka',sans-serif; font-size:26px; letter-spacing:1px; text-align:center; max-width:480px; }
+  .tchar{ transition:color 100ms ease, background 100ms ease; }
+  .tchar.pending{ color:var(--ink-soft); }
+  .tchar.correct{ color:var(--leaf-dark); }
+  .tchar.wrong{ color:#fff; background:var(--tomato); border-radius:4px; }
+  .typing-input{
+    width:100%; max-width:340px; padding:12px 18px; border-radius:14px; border:3px solid #EDE9F7;
+    font-family:'Fredoka',sans-serif; font-size:18px; text-align:center; color:var(--ink);
+  }
+  .typing-input:focus{ outline:none; border-color:var(--teal); }
+  .typing-input.is-wrong{ animation:shake-wrong 420ms ease; border-color:var(--tomato); }
+
+  .speed-timer{
+    font-family:'Fredoka',sans-serif; font-weight:700; font-size:28px; color:var(--ink);
+    background:#EDE9F7; border-radius:16px; padding:8px 20px; margin-bottom:6px;
+  }
+  .speed-timer.urgent{ background:#FFE1DD; color:var(--tomato-dark); animation:pip-urgent 900ms ease-in-out infinite; }
+  @keyframes pip-urgent{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.08); } }
+
+  .big-letter{ font-family:'Fredoka',sans-serif; font-weight:700; font-size:92px; color:var(--ink); background:#fff;
+    border:4px solid var(--amber); border-radius:26px; width:140px; height:140px; display:flex; align-items:center; justify-content:center; }
+  .letter-opt{ font-size:38px; width:84px; height:84px; }
+
+  .emoji-cluster{ display:flex; flex-wrap:wrap; gap:6px; max-width:260px; justify-content:center; font-size:34px; }
+  .num-opt{ font-size:30px; width:74px; height:74px; }
+
+  .shape-target-wrap{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .shape-box{ width:96px; height:96px; }
+  .shape-opt .shape-box{ width:56px; height:56px; }
+  .shape-opt{ width:88px; height:88px; }
+
+  .color-word{ font-family:'Fredoka',sans-serif; font-size:34px; font-weight:600; color:var(--ink); }
+  .swatch{ width:100%; height:100%; border-radius:14px; }
+  .swatch-opt{ width:90px; height:90px; }
+  .swatch-target{ width:110px; height:110px; border-radius:22px; box-shadow:0 6px 0 -2px rgba(var(--shadow-ink),0.15); }
+
+  .math-row{ display:flex; align-items:center; gap:10px; font-size:26px; font-family:'Fredoka',sans-serif; flex-wrap:wrap; justify-content:center; }
+  .math-fruits{ display:flex; gap:2px; font-size:24px; }
+  .math-op{ font-size:30px; font-weight:700; color:var(--grape-dark); }
+
+  .memory-grid{ display:grid; grid-template-columns:repeat(4, 66px); gap:10px; justify-content:center; }
+  @media (max-width:420px){ .memory-grid{ grid-template-columns:repeat(3, 62px); } }
+  .memory-card{ width:66px; height:66px; border-radius:14px; cursor:pointer; position:relative; background:var(--teal); border:none; perspective:600px; }
+  @media (max-width:420px){ .memory-card{ width:62px; height:62px; } }
+  .memory-card .inner{ position:relative; width:100%; height:100%; transition:transform 320ms; transform-style:preserve-3d; }
+  .memory-card.flipped .inner{ transform:rotateY(180deg); }
+  .memory-card .face{ position:absolute; inset:0; border-radius:14px; display:flex; align-items:center; justify-content:center; backface-visibility:hidden; font-size:28px; }
+  .memory-card .front{ background:linear-gradient(135deg, var(--teal), var(--teal-dark)); color:#fff; font-size:22px; }
+  .memory-card .back{ background:#fff; transform:rotateY(180deg); border:3px solid #EDE9F7; }
+  .memory-card.matched .back{ border-color:var(--leaf-dark); background:#EAFBEC; }
+  .memory-card:focus-visible{ outline:3px solid var(--ink); outline-offset:3px; }
+  .memory-meta{ display:flex; gap:18px; font-weight:700; color:var(--ink-soft); font-size:13.5px; margin-bottom:6px; }
+
+  .complete-overlay{
+    position:absolute; inset:10px; border-radius:24px; background:rgba(255,255,255,0.97); display:flex;
+    flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; padding:20px; overflow:hidden;
+  }
+  .complete-overlay h2{ font-family:'Fredoka',sans-serif; font-size:24px; margin:0; }
+  .complete-stars{ font-size:28px; letter-spacing:4px; }
+  .complete-actions{ display:flex; gap:12px; margin-top:6px; flex-wrap:wrap; justify-content:center; }
+  .primary-btn, .secondary-btn{
+    font-family:'Fredoka',sans-serif; font-weight:600; font-size:15px; border:none; border-radius:16px; padding:12px 20px; cursor:pointer;
+  }
+  .primary-btn{ background:var(--leaf-dark); color:#fff; box-shadow:0 4px 0 #2c6a3c; }
+  .primary-btn:active{ transform:translateY(3px); box-shadow:none; }
+  .secondary-btn{ background:#EDE9F7; color:var(--ink); box-shadow:0 4px 0 #cfc8ea; }
+  .secondary-btn:active{ transform:translateY(3px); box-shadow:none; }
+
+  .confetti-piece{ position:absolute; top:0; width:9px; height:14px; border-radius:2px; opacity:0.95; animation:confetti-fall 1500ms ease-in forwards; }
+  @keyframes confetti-fall{ from{ transform:translateY(-20px) rotate(0deg); opacity:1; } to{ transform:translateY(320px) rotate(400deg); opacity:0; } }
+
+  /* scoreboard */
+  .score-section{ margin-bottom:22px; max-width:640px; width:100%; margin-left:auto; margin-right:auto; }
+  .score-section h3{ font-family:'Fredoka',sans-serif; font-size:18px; margin:0 0 10px; }
+  .score-list{ display:flex; flex-direction:column; gap:8px; }
+  .score-row{ display:flex; align-items:center; gap:10px; background:#fff; border-radius:14px; padding:10px 14px;
+    box-shadow:0 4px 0 -1px rgba(43,35,80,0.08); }
+  .score-icon{ font-size:19px; }
+  .score-name{ flex:1; font-weight:700; font-size:13.5px; }
+  .score-val{ font-weight:800; font-size:12.5px; color:var(--ink-soft); white-space:nowrap; }
+
+  .mascot{ position:fixed; left:16px; bottom:16px; display:flex; align-items:flex-end; gap:8px; z-index:5; max-width:min(88vw, 360px); }
+  .mascot-bee{ font-size:38px; flex:0 0 auto; }
+  .mascot-bubble{ background:#fff; border-radius:16px 16px 16px 4px; padding:10px 14px; font-weight:700; font-size:13px; color:var(--ink);
+    box-shadow:0 8px 18px -8px rgba(var(--shadow-ink),0.4); max-width:270px; }
+
+  .site-footer{ text-align:center; font-size:12px; font-weight:700; color:rgba(43,35,80,0.55); padding:16px 10px 100px; }
+
+  .site-nav{ display:flex; align-items:center; justify-content:space-between; padding:12px 18px 0; position:relative; z-index:2; }
+  .site-nav-brand{ font-family:'Fredoka',sans-serif; font-weight:700; font-size:15px; color:#2B2350; text-decoration:none; display:flex; align-items:center; gap:6px; }
+  .site-nav-links{ display:flex; align-items:center; gap:4px; }
+  .site-nav-links a{ text-decoration:none; font-weight:700; font-size:12.5px; color:#5b5480; padding:7px 11px; border-radius:10px; background:rgba(255,255,255,0.6); }
+  .site-nav-links a.active{ background:#fff; color:#2B2350; }
+</style>
+</head>
+<body>
+
+<div class="scenery">
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="hill h1"></div>
+  <div class="hill h2"></div>
+</div>
+
+<div id="app">
+  <div class="site-nav">
+    <a href="index.html" class="site-nav-brand">🏡 Igidigbo Kids World</a>
+    <div class="site-nav-links">
+      <a href="index.html">Home</a>
+      <a href="games.html" class="active">Games</a>
+      <a href="stories.html">Stories</a>
+    </div>
+  </div>
+  <div class="topbar">
+    <div class="topbar-left" id="topbar-left"></div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="star-pill"><span>⭐</span><span id="total-stars">0</span></div>
+      <button class="icon-btn" id="scores-btn" aria-label="High Scores" title="High Scores">🏆</button>
+      <button class="icon-btn" id="mute-btn" aria-label="Mute sound" title="Sound">🔊</button>
+    </div>
+  </div>
+
+  <main id="home-screen">
+    <div class="hero">
+      <h1>Sunny Meadow</h1>
+      <p>Two worlds of learning games &mdash; pick your adventure!</p>
+    </div>
+    <div class="category-grid" id="category-grid-home"></div>
+    <button class="scores-link" id="home-scores-link">🏆 View High Scores</button>
+  </main>
+
+  <main id="category-screen" class="hidden">
+    <div class="hero" style="padding-top:8px;">
+      <h1 id="category-heading" style="font-size:30px;">Category</h1>
+      <p id="category-sub"></p>
+    </div>
+    <div class="game-grid" id="category-grid"></div>
+  </main>
+
+  <main id="game-screen" class="hidden">
+    <div class="game-panel" id="game-panel">
+      <div class="game-title-row">
+        <h2 id="game-title">Game</h2>
+        <div class="round-info" id="round-info"></div>
+      </div>
+      <div class="progress-row" id="progress-row"></div>
+      <div class="stage" id="stage"></div>
+    </div>
+  </main>
+
+  <main id="scores-screen" class="hidden">
+    <div class="hero" style="padding-top:8px;">
+      <h1 style="font-size:30px;">🏆 High Scores</h1>
+      <p>Your best stars out of 8 for every game this session.</p>
+    </div>
+    <div id="scores-content"></div>
+  </main>
+
+  <div class="site-footer">© 2026 All rights reserved Hontech Technology.</div>
+</div>
+
+<div class="mascot" aria-live="polite">
+  <div class="mascot-bee">🐝</div>
+  <div class="mascot-bubble" id="mascot-text">Hi! I'm Buzz. Pick a world to explore!</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ shared state ============ */
+  var totalStars = 0;
+  var muted = false;
+  var audioCtx = null;
+  var scores = {};
+  var currentCategory = null;
+
+  var homeScreen = document.getElementById('home-screen');
+  var categoryScreen = document.getElementById('category-screen');
+  var gameScreen = document.getElementById('game-screen');
+  var scoresScreen = document.getElementById('scores-screen');
+  var gamePanel = document.getElementById('game-panel');
+  var gameTitleEl = document.getElementById('game-title');
+  var roundInfoEl = document.getElementById('round-info');
+  var progressRow = document.getElementById('progress-row');
+  var stage = document.getElementById('stage');
+  var topbarLeft = document.getElementById('topbar-left');
+  var totalStarsEl = document.getElementById('total-stars');
+  var mascotText = document.getElementById('mascot-text');
+  var muteBtn = document.getElementById('mute-btn');
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  function pickN(arr, n){ return shuffle(arr).slice(0,n); }
+  function pickOne(arr){ return arr[randInt(0,arr.length-1)]; }
+
+  function mascotSay(text){ mascotText.textContent = text; }
+  function addTotalStars(n){ totalStars += n; totalStarsEl.textContent = totalStars; }
+
+  function ensureAudio(){
+    if(!audioCtx){ try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx = null; } }
+    if(audioCtx && audioCtx.state === 'suspended'){ audioCtx.resume(); }
+  }
+  document.addEventListener('click', ensureAudio, { once:true });
+
+  /* cartoon sound effects */
+  function playCartoon(kind){
+    if(muted || !audioCtx) return;
+    try{
+      var now = audioCtx.currentTime;
+      if(kind === 'correct'){
+        var notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach(function(f, idx){
+          var osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+          osc.type = 'triangle'; osc.frequency.value = f;
+          var start = now + idx * 0.07;
+          gain.gain.setValueAtTime(0, start);
+          gain.gain.linearRampToValueAtTime(0.18, start + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(start); osc.stop(start + 0.24);
+        });
+      } else {
+        [0, 0.28].forEach(function(offset){
+          var osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          var start = now + offset;
+          osc.frequency.setValueAtTime(300, start);
+          osc.frequency.exponentialRampToValueAtTime(140, start + 0.26);
+          gain.gain.setValueAtTime(0.001, start);
+          gain.gain.linearRampToValueAtTime(0.14, start + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(start); osc.stop(start + 0.3);
+        });
+      }
+    }catch(e){ /* ignore audio errors */ }
+  }
+
+  muteBtn.addEventListener('click', function(){
+    muted = !muted;
+    muteBtn.textContent = muted ? '🔇' : '🔊';
+    muteBtn.setAttribute('aria-label', muted ? 'Unmute sound' : 'Mute sound');
+  });
+
+  function confettiBurst(container, count){
+    var colors = ['#FFC94A','#FF7AB6','#3FBFB0','#A66BD1','#5FB86A','#FF7A6E','#4FA8FF'];
+    for(var i=0;i<(count||26);i++){
+      var piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = randInt(2,96) + '%';
+      piece.style.background = colors[randInt(0,colors.length-1)];
+      piece.style.animationDelay = (Math.random()*0.3) + 's';
+      piece.style.animationDuration = (1.1 + Math.random()*0.7) + 's';
+      container.appendChild(piece);
+      (function(p){ setTimeout(function(){ p.remove(); }, 2000); })(piece);
+    }
+  }
+
+  /* ============ navigation ============ */
+  var CATEGORY_INFO = {
+    explorer: { title:'Little Explorers', age:'Age 3–10', icon:'🌻', theme:'theme-explorer', desc:'First steps into letters, numbers, shapes, colors and the world around us.' },
+    challenge:{ title:'Challenge Zone', age:'Age 10–15', icon:'🚀', theme:'theme-challenge', desc:'Brain-stretching math, science, language, geography and logic.' }
+  };
+
+  function backBtnHtml(){ return '<button class="back-btn" id="back-nav-btn">&larr; Back</button>'; }
+
+  function showHome(){
+    gameScreen.classList.add('hidden');
+    categoryScreen.classList.add('hidden');
+    scoresScreen.classList.add('hidden');
+    homeScreen.classList.remove('hidden');
+    topbarLeft.innerHTML = '<span style="font-family:\'Fredoka\',sans-serif; font-weight:700; font-size:18px;">🌻&nbsp;Sunny Meadow</span>';
+    mascotSay("Hi! I'm Buzz. Pick a world to explore!");
+  }
+
+  function showCategory(catId){
+    currentCategory = catId;
+    homeScreen.classList.add('hidden');
+    gameScreen.classList.add('hidden');
+    scoresScreen.classList.add('hidden');
+    categoryScreen.classList.remove('hidden');
+    topbarLeft.innerHTML = backBtnHtml();
+    document.getElementById('back-nav-btn').addEventListener('click', showHome);
+    var info = CATEGORY_INFO[catId];
+    document.getElementById('category-heading').textContent = info.icon + ' ' + info.title;
+    document.getElementById('category-sub').textContent = info.age + ' — ' + info.desc;
+    var grid = document.getElementById('category-grid');
+    grid.innerHTML = '';
+    var list = GAMES.filter(function(g){ return g.category === catId; });
+    list.forEach(function(g, idx){
+      var theme = THEME_CYCLE[idx % THEME_CYCLE.length];
+      var card = document.createElement('button');
+      card.className = 'game-card';
+      card.innerHTML =
+        '<div class="card-top ' + theme + '"><span>' + g.icon + '</span></div>' +
+        '<div class="card-body"><h3>' + g.title + '</h3><p>' + g.desc + '</p><div class="card-cta">Let\'s play</div></div>';
+      card.addEventListener('click', function(){ g.start(); });
+      grid.appendChild(card);
+    });
+    mascotSay("Pick a game — I'll be right here cheering!");
+  }
+
+  function enterGameScreen(title){
+    homeScreen.classList.add('hidden');
+    categoryScreen.classList.add('hidden');
+    scoresScreen.classList.add('hidden');
+    gameScreen.classList.remove('hidden');
+    topbarLeft.innerHTML = backBtnHtml();
+    document.getElementById('back-nav-btn').addEventListener('click', function(){
+      showCategory(currentCategory || 'explorer');
+    });
+    gameTitleEl.textContent = title;
+  }
+
+  function showScores(){
+    homeScreen.classList.add('hidden');
+    categoryScreen.classList.add('hidden');
+    gameScreen.classList.add('hidden');
+    scoresScreen.classList.remove('hidden');
+    topbarLeft.innerHTML = backBtnHtml();
+    document.getElementById('back-nav-btn').addEventListener('click', showHome);
+    renderScoreboard();
+    mascotSay("Here's how you're doing so far!");
+  }
+
+  function renderScoreboard(){
+    var el = document.getElementById('scores-content');
+    el.innerHTML = '';
+    ['explorer','challenge'].forEach(function(cat){
+      var info = CATEGORY_INFO[cat];
+      var catGames = GAMES.filter(function(g){ return g.category === cat; });
+      var section = document.createElement('div');
+      section.className = 'score-section';
+      section.innerHTML = '<h3>' + info.icon + ' ' + info.title + '</h3>';
+      var list = document.createElement('div');
+      list.className = 'score-list';
+      catGames.forEach(function(g){
+        var best = scores[g.id];
+        var row = document.createElement('div');
+        row.className = 'score-row';
+        row.innerHTML = '<span class="score-icon">' + g.icon + '</span><span class="score-name">' + g.title + '</span>' +
+          '<span class="score-val">' + (best ? '⭐ ' + best + '/8' : 'Not played yet') + '</span>';
+        list.appendChild(row);
+      });
+      section.appendChild(list);
+      el.appendChild(section);
+    });
+  }
+
+  document.getElementById('scores-btn').addEventListener('click', showScores);
+  document.getElementById('home-scores-link').addEventListener('click', showScores);
+
+  /* ============ shared round-based engine ============ */
+  var ROUNDS_PER_GAME = 8;
+  var DEFAULT_PRAISE = ["Great job!","You got it!","Awesome!","Nicely done!","Brilliant!","Well done!"];
+  var DEFAULT_ENCOURAGE = ["Not quite, try again!","Almost! Give it another shot.","Keep trying, you can do it!"];
+
+  function makeProgressPips(){
+    progressRow.innerHTML = '';
+    for(var i=0;i<ROUNDS_PER_GAME;i++){
+      var pip = document.createElement('div');
+      pip.className = 'pip'; pip.id = 'pip-'+i;
+      progressRow.appendChild(pip);
+    }
+  }
+  function markPipDone(i){
+    var pip = document.getElementById('pip-'+i);
+    if(pip){ pip.classList.add('done'); pip.textContent = '★'; }
+  }
+  function showRoundInfo(i){ roundInfoEl.textContent = 'Round ' + (i+1) + ' of ' + ROUNDS_PER_GAME; }
+
+  function showCompletion(gameId, starsEarned, message, onReplay){
+    scores[gameId] = Math.max(scores[gameId] || 0, starsEarned);
+    var overlay = document.createElement('div');
+    overlay.className = 'complete-overlay';
+    overlay.innerHTML =
+      '<div style="font-size:50px;">🎉</div>' +
+      '<h2>' + message + '</h2>' +
+      '<div class="complete-stars">' + '⭐'.repeat(Math.max(1,starsEarned)) + '</div>' +
+      '<div class="complete-actions">' +
+        '<button class="primary-btn" id="replay-btn">Play Again</button>' +
+        '<button class="secondary-btn" id="meadow-btn">Back to Games</button>' +
+      '</div>';
+    gamePanel.appendChild(overlay);
+    confettiBurst(overlay, 28);
+    mascotSay("Woo-hoo! You collected " + starsEarned + " stars! Amazing work!");
+    playCartoon('correct');
+    document.getElementById('meadow-btn').addEventListener('click', function(){
+      overlay.remove();
+      showCategory(currentCategory || 'explorer');
+    });
+    document.getElementById('replay-btn').addEventListener('click', function(){
+      overlay.remove();
+      onReplay();
+    });
+  }
+
+  function runRoundGame(config){
+    enterGameScreen(config.title);
+    makeProgressPips();
+    var roundIndex = 0;
+    var starsEarned = 0;
+    var locked = false;
+
+    function nextRound(){
+      if(roundIndex >= ROUNDS_PER_GAME){
+        showCompletion(config.gameId, starsEarned, config.finishMessage || 'Great job!', function(){
+          roundIndex = 0; starsEarned = 0;
+          makeProgressPips();
+          nextRound();
+        });
+        return;
+      }
+      locked = false;
+      showRoundInfo(roundIndex);
+      stage.innerHTML = '';
+      config.buildRound(roundIndex, {
+        onAnswer: function(isCorrect, btnEl){
+          if(locked) return;
+          if(isCorrect){
+            locked = true;
+            btnEl.classList.add('is-correct');
+            markPipDone(roundIndex);
+            starsEarned += 1;
+            addTotalStars(1);
+            playCartoon('correct');
+            mascotSay(pickOne(config.praise));
+            setTimeout(function(){ roundIndex += 1; nextRound(); }, 850);
+          } else {
+            btnEl.classList.add('is-wrong');
+            playCartoon('wrong');
+            mascotSay(pickOne(config.encourage));
+            setTimeout(function(){ btnEl.classList.remove('is-wrong'); }, 420);
+          }
+        }
+      });
+    }
+    nextRound();
+  }
+
+  function optionButton(innerHTML, extraClass){
+    var b = document.createElement('button');
+    b.className = 'option-btn' + (extraClass ? ' ' + extraClass : '');
+    b.innerHTML = innerHTML;
+    return b;
+  }
+
+  /* generic text-based question renderer, shared by bank & procedural games */
+  function renderGenericPrompt(item, api){
+    var prompt = document.createElement('div');
+    prompt.className = 'prompt';
+    prompt.innerHTML = item.p;
+    stage.appendChild(prompt);
+    var row = document.createElement('div');
+    row.className = 'options-row';
+    item.o.forEach(function(optText, idx){
+      var btn = optionButton(optText, 'text-opt');
+      btn.addEventListener('click', function(){ api.onAnswer(idx === item.c, btn); });
+      row.appendChild(btn);
+    });
+    stage.appendChild(row);
+  }
+  function makeQueue(pool, n){
+    var q = [];
+    var shuffled = shuffle(pool);
+    var guard = 0;
+    while(q.length < n && guard < 50){
+      for(var i=0;i<shuffled.length && q.length<n;i++){ q.push(shuffled[i]); }
+      shuffled = shuffle(pool);
+      guard++;
+    }
+    return q;
+  }
+  function makeOptions(correctVal, distractors){
+    var all = [correctVal].concat(distractors);
+    var order = shuffle(all.map(function(_,i){ return i; }));
+    var o = order.map(function(i){ return String(all[i]); });
+    var c = order.indexOf(0);
+    return { o:o, c:c };
+  }
+  function bankGame(id, title, pool, finishMessage){
+    var queue = [];
+    runRoundGame({
+      gameId:id, title:title, praise:DEFAULT_PRAISE, encourage:DEFAULT_ENCOURAGE, finishMessage:finishMessage,
+      buildRound: function(index, api){
+        if(index === 0){ queue = makeQueue(pool, ROUNDS_PER_GAME); }
+        renderGenericPrompt(queue[index % queue.length], api);
+      }
+    });
+  }
+  function proceduralGame(id, title, generatorFn, finishMessage){
+    runRoundGame({
+      gameId:id, title:title, praise:DEFAULT_PRAISE, encourage:DEFAULT_ENCOURAGE, finishMessage:finishMessage,
+      buildRound: function(index, api){ renderGenericPrompt(generatorFn(), api); }
+    });
+  }
+
+  /* ============ EXPLORER: Game 1 — Bumble ABC (custom) ============ */
+  var LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  function gameABC(){
+    runRoundGame({
+      gameId:'abc', title:'Bumble ABC',
+      praise:["Buzzing brilliant!","You found it!","Letter master!","Sweet as honey!"],
+      encourage:["Not quite, try again!","So close, keep going!","Have another look!"],
+      finishMessage:"You matched all the letters!",
+      buildRound: function(i, api){
+        var target = LETTERS[randInt(0,25)];
+        var correct = target.toLowerCase();
+        var distractors = [];
+        while(distractors.length < 2){
+          var L = LETTERS[randInt(0,25)].toLowerCase();
+          if(L !== correct && distractors.indexOf(L) === -1) distractors.push(L);
+        }
+        var options = shuffle([correct, distractors[0], distractors[1]]);
+        var prompt = document.createElement('div'); prompt.className='prompt'; prompt.innerHTML='Find the little letter that matches:';
+        stage.appendChild(prompt);
+        var big = document.createElement('div'); big.className='big-letter'; big.textContent=target;
+        stage.appendChild(big);
+        var row = document.createElement('div'); row.className='options-row';
+        options.forEach(function(opt){
+          var btn = optionButton(opt, 'letter-opt');
+          btn.addEventListener('click', function(){ api.onAnswer(opt===correct, btn); });
+          row.appendChild(btn);
+        });
+        stage.appendChild(row);
+      }
+    });
+  }
+
+  /* Game 2 — Counting Carnival (custom) */
+  var COUNT_EMOJI = ['🎈','⭐','🍓','🐝','🌼','🍪','🐞','🎉'];
+  function gameCounting(){
+    runRoundGame({
+      gameId:'count', title:'Counting Carnival',
+      praise:["Perfect count!","You counted them all!","Number ninja!","Fantastic!"],
+      encourage:["Count again, slowly!","Almost! Try counting one by one.","You can do it!"],
+      finishMessage:"You counted your way through the carnival!",
+      buildRound: function(i, api){
+        var emoji = COUNT_EMOJI[randInt(0,COUNT_EMOJI.length-1)];
+        var count = randInt(1,10);
+        var wrongSet = [];
+        while(wrongSet.length < 2){
+          var n = randInt(1,12);
+          if(n !== count && wrongSet.indexOf(n) === -1) wrongSet.push(n);
+        }
+        var options = shuffle([count, wrongSet[0], wrongSet[1]]);
+        var prompt = document.createElement('div'); prompt.className='prompt'; prompt.innerHTML='How many do you see?';
+        stage.appendChild(prompt);
+        var cluster = document.createElement('div'); cluster.className='emoji-cluster';
+        for(var k=0;k<count;k++){ var s=document.createElement('span'); s.textContent=emoji; cluster.appendChild(s); }
+        stage.appendChild(cluster);
+        var row = document.createElement('div'); row.className='options-row';
+        options.forEach(function(n){
+          var btn = optionButton(String(n), 'num-opt');
+          btn.addEventListener('click', function(){ api.onAnswer(n===count, btn); });
+          row.appendChild(btn);
+        });
+        stage.appendChild(row);
+      }
+    });
+  }
+
+  /* Game 3 — Shape Meadow (custom) */
+  var SHAPES = [
+    { name:'circle', style:function(el){ el.style.borderRadius='50%'; } },
+    { name:'square', style:function(el){ el.style.borderRadius='10px'; } },
+    { name:'rectangle', style:function(el){ el.style.borderRadius='8px'; } },
+    { name:'triangle', style:function(el){ el.style.clipPath='polygon(50% 0%, 0% 100%, 100% 100%)'; } },
+    { name:'star', style:function(el){ el.style.clipPath='polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'; } },
+    { name:'diamond', style:function(el){ el.style.clipPath='polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)'; } }
+  ];
+  var SHAPE_COLORS = ['#FF7A6E','#4FA8FF','#63C77A','#FFC94A','#A66BD1','#FF7AB6'];
+  function makeShapeEl(shapeDef, size){
+    var el = document.createElement('div');
+    el.className = 'shape-box';
+    el.style.width = size+'px'; el.style.height = size+'px';
+    el.style.background = SHAPE_COLORS[randInt(0,SHAPE_COLORS.length-1)];
+    if(shapeDef.name === 'rectangle'){ el.style.width=(size*1.5)+'px'; el.style.height=(size*0.7)+'px'; }
+    shapeDef.style(el);
+    return el;
+  }
+  function gameShapes(){
+    runRoundGame({
+      gameId:'shape', title:'Shape Meadow',
+      praise:["Shape spotter!","You found the twin!","Great eyes!","Nailed it!"],
+      encourage:["Look at the outline again!","Not this one, try another!","Keep looking!"],
+      finishMessage:"You matched every shape in the meadow!",
+      buildRound: function(i, api){
+        var target = SHAPES[randInt(0,SHAPES.length-1)];
+        var others = SHAPES.filter(function(s){ return s.name !== target.name; });
+        var distractors = pickN(others, 3);
+        var options = shuffle([target].concat(distractors));
+        var prompt = document.createElement('div'); prompt.className='prompt'; prompt.innerHTML='Which shape below matches this one?';
+        stage.appendChild(prompt);
+        var wrap = document.createElement('div'); wrap.className='shape-target-wrap';
+        wrap.appendChild(makeShapeEl(target, 96));
+        stage.appendChild(wrap);
+        var row = document.createElement('div'); row.className='options-row';
+        options.forEach(function(s){
+          var btn = optionButton('', 'shape-opt');
+          btn.appendChild(makeShapeEl(s, 52));
+          btn.addEventListener('click', function(){ api.onAnswer(s.name===target.name, btn); });
+          row.appendChild(btn);
+        });
+        stage.appendChild(row);
+      }
+    });
+  }
+
+  /* Game 4 — Color Garden (custom) */
+  var COLORS = [
+    {name:'Red', hex:'#FF5C5C'}, {name:'Blue', hex:'#4FA8FF'}, {name:'Yellow', hex:'#FFD166'},
+    {name:'Green', hex:'#63C77A'}, {name:'Purple', hex:'#A66BD1'}, {name:'Orange', hex:'#FF9F45'},
+    {name:'Pink', hex:'#FF7AB6'}, {name:'Brown', hex:'#B08463'}
+  ];
+  function gameColors(){
+    runRoundGame({
+      gameId:'color', title:'Color Garden',
+      praise:["Colorful genius!","Perfect match!","Your eyes are sharp!","Beautiful!"],
+      encourage:["Try another color!","Look closely and try again!","Almost, keep trying!"],
+      finishMessage:"You grew a whole garden of colors!",
+      buildRound: function(i, api){
+        var target = COLORS[randInt(0,COLORS.length-1)];
+        var others = COLORS.filter(function(c){ return c.name !== target.name; });
+        var distractors = pickN(others, 2);
+        var options = shuffle([target, distractors[0], distractors[1]]);
+        var wordMode = Math.random() < 0.5;
+        var prompt = document.createElement('div'); prompt.className='prompt';
+        prompt.innerHTML = wordMode ? 'Tap the color that matches this word:' : 'Tap the swatch that matches this color:';
+        stage.appendChild(prompt);
+        if(wordMode){
+          var word = document.createElement('div'); word.className='color-word'; word.textContent=target.name;
+          stage.appendChild(word);
+        } else {
+          var sw = document.createElement('div'); sw.className='swatch-target'; sw.style.background=target.hex;
+          stage.appendChild(sw);
+        }
+        var row = document.createElement('div'); row.className='options-row';
+        options.forEach(function(c){
+          var btn = optionButton('', 'swatch-opt');
+          var inner = document.createElement('div'); inner.className='swatch'; inner.style.background=c.hex;
+          btn.appendChild(inner);
+          btn.setAttribute('aria-label', c.name);
+          btn.addEventListener('click', function(){ api.onAnswer(c.name===target.name, btn); });
+          row.appendChild(btn);
+        });
+        stage.appendChild(row);
+      }
+    });
+  }
+
+  /* Game 5 — Memory Meadow (custom) */
+  var MEMORY_EMOJI = ['🦋','🐞','🐝','🍄','🌸','🐌'];
+  function gameMemory(){
+    enterGameScreen('Memory Meadow');
+    progressRow.innerHTML = '';
+    roundInfoEl.textContent = '';
+    var deck = shuffle(MEMORY_EMOJI.concat(MEMORY_EMOJI)).map(function(e, idx){ return { id:idx, emoji:e, matched:false }; });
+    var flippedIds = [];
+    var tries = 0;
+    var matchedPairs = 0;
+    var locked = false;
+
+    function render(){
+      stage.innerHTML = '';
+      var meta = document.createElement('div'); meta.className='memory-meta';
+      meta.innerHTML = '<span>Pairs found: '+matchedPairs+' / '+MEMORY_EMOJI.length+'</span><span>Tries: '+tries+'</span>';
+      stage.appendChild(meta);
+      var grid = document.createElement('div'); grid.className='memory-grid';
+      deck.forEach(function(card){
+        var btn = document.createElement('button');
+        btn.className = 'memory-card' + (flippedIds.indexOf(card.id) > -1 || card.matched ? ' flipped' : '') + (card.matched ? ' matched' : '');
+        btn.setAttribute('aria-label', card.matched ? 'Matched card' : 'Face-down card');
+        btn.innerHTML = '<div class="inner"><div class="face front">?</div><div class="face back">'+card.emoji+'</div></div>';
+        btn.addEventListener('click', function(){ handleFlip(card); });
+        grid.appendChild(btn);
+      });
+      stage.appendChild(grid);
+    }
+    function handleFlip(card){
+      if(locked || card.matched || flippedIds.indexOf(card.id) > -1) return;
+      flippedIds.push(card.id);
+      render();
+      if(flippedIds.length === 2){
+        tries += 1; locked = true;
+        var c1 = deck[flippedIds[0]], c2 = deck[flippedIds[1]];
+        if(c1.emoji === c2.emoji){
+          setTimeout(function(){
+            c1.matched = true; c2.matched = true; matchedPairs += 1; flippedIds = []; locked = false;
+            playCartoon('correct');
+            mascotSay(pickOne(["Sweet match!","You found a pair!","Great memory!"]));
+            render();
+            if(matchedPairs === MEMORY_EMOJI.length){
+              var starsResult = tries <= 8 ? 8 : (tries <= 12 ? 6 : 4);
+              addTotalStars(starsResult);
+              setTimeout(function(){ showCompletion('memory', starsResult, 'You matched every pair!', function(){ gameMemory(); }); }, 300);
+            }
+          }, 500);
+        } else {
+          playCartoon('wrong');
+          mascotSay(pickOne(["Keep those in mind and try again!","Not a match, try another pair!","So close, keep trying!"]));
+          setTimeout(function(){ flippedIds = []; locked = false; render(); }, 700);
+        }
+      }
+    }
+    mascotSay("Flip two cards to find matching pairs!");
+    render();
+  }
+
+  /* Game 6 — Apple Orchard Math (custom) */
+  function gameMath(){
+    runRoundGame({
+      gameId:'math', title:'Apple Orchard Math',
+      praise:["Math whiz!","You solved it!","Great adding!","Orchard champion!"],
+      encourage:["Count the apples again!","So close, try once more!","You've got this!"],
+      finishMessage:"You picked every math problem in the orchard!",
+      buildRound: function(i, api){
+        var a = randInt(1,5), b = randInt(1,5), sum = a+b;
+        var wrongSet = [];
+        while(wrongSet.length < 2){
+          var n = sum + (randInt(0,1) ? randInt(1,3) : -randInt(1,3));
+          if(n >= 0 && n !== sum && wrongSet.indexOf(n) === -1) wrongSet.push(n);
+        }
+        var options = shuffle([sum, wrongSet[0], wrongSet[1]]);
+        var prompt = document.createElement('div'); prompt.className='prompt'; prompt.innerHTML='How many apples are there in total?';
+        stage.appendChild(prompt);
+        var row = document.createElement('div'); row.className='math-row';
+        var f1=document.createElement('div'); f1.className='math-fruits'; f1.textContent='🍎'.repeat(a);
+        var op=document.createElement('div'); op.className='math-op'; op.textContent='+';
+        var f2=document.createElement('div'); f2.className='math-fruits'; f2.textContent='🍎'.repeat(b);
+        var eq=document.createElement('div'); eq.className='math-op'; eq.textContent='=';
+        var q=document.createElement('div'); q.className='math-op'; q.textContent='?';
+        row.appendChild(f1); row.appendChild(op); row.appendChild(f2); row.appendChild(eq); row.appendChild(q);
+        stage.appendChild(row);
+        var optRow = document.createElement('div'); optRow.className='options-row';
+        options.forEach(function(n){
+          var btn = optionButton(String(n), 'num-opt');
+          btn.addEventListener('click', function(){ api.onAnswer(n===sum, btn); });
+          optRow.appendChild(btn);
+        });
+        stage.appendChild(optRow);
+      }
+    });
+  }
+
+  /* ============ EXPLORER: bank / procedural games 7-15 ============ */
+  var ANIMAL_SOUNDS_POOL = [
+    {p:"Which animal says 'Moo'?", o:["🐄 Cow","🐶 Dog","🐱 Cat"], c:0},
+    {p:"Which animal says 'Woof'?", o:["🐶 Dog","🦆 Duck","🐑 Sheep"], c:0},
+    {p:"Which animal says 'Meow'?", o:["🐱 Cat","🐄 Cow","🐷 Pig"], c:0},
+    {p:"Which animal says 'Oink'?", o:["🐷 Pig","🐸 Frog","🦉 Owl"], c:0},
+    {p:"Which animal says 'Quack'?", o:["🦆 Duck","🐴 Horse","🐝 Bee"], c:0},
+    {p:"Which animal says 'Baa'?", o:["🐑 Sheep","🦁 Lion","🐱 Cat"], c:0},
+    {p:"Which animal says 'Neigh'?", o:["🐴 Horse","🐶 Dog","🦆 Duck"], c:0},
+    {p:"Which animal says 'Roar'?", o:["🦁 Lion","🐭 Mouse","🐦 Bird"], c:0},
+    {p:"Which animal says 'Ribbit'?", o:["🐸 Frog","🐄 Cow","🐷 Pig"], c:0},
+    {p:"Which animal says 'Tweet'?", o:["🐦 Bird","🐍 Snake","🐻 Bear"], c:0},
+    {p:"Which animal says 'Hoot'?", o:["🦉 Owl","🦆 Duck","🐴 Horse"], c:0},
+    {p:"Which animal says 'Buzz'?", o:["🐝 Bee","🐟 Fish","🐑 Sheep"], c:0},
+    {p:"Which animal says 'Hiss'?", o:["🐍 Snake","🐱 Cat","🦁 Lion"], c:0},
+    {p:"Which animal says 'Squeak'?", o:["🐭 Mouse","🐻 Bear","🐄 Cow"], c:0}
+  ];
+  var OPPOSITES_POOL = [
+    {p:"What is the opposite of BIG?", o:["Small","Round","Fast"], c:0},
+    {p:"What is the opposite of HOT?", o:["Cold","Wet","Loud"], c:0},
+    {p:"What is the opposite of UP?", o:["Down","Left","Big"], c:0},
+    {p:"What is the opposite of FAST?", o:["Slow","Loud","Tall"], c:0},
+    {p:"What is the opposite of HAPPY?", o:["Sad","Sleepy","Fast"], c:0},
+    {p:"What is the opposite of DAY?", o:["Night","Sun","Cloud"], c:0},
+    {p:"What is the opposite of IN?", o:["Out","Down","Small"], c:0},
+    {p:"What is the opposite of OPEN?", o:["Closed","Loud","Wet"], c:0},
+    {p:"What is the opposite of WET?", o:["Dry","Cold","Big"], c:0},
+    {p:"What is the opposite of LOUD?", o:["Quiet","Fast","Bright"], c:0},
+    {p:"What is the opposite of FULL?", o:["Empty","Heavy","Round"], c:0},
+    {p:"What is the opposite of OLD?", o:["New","Small","Slow"], c:0},
+    {p:"What is the opposite of LIGHT?", o:["Dark","Fast","Wet"], c:0},
+    {p:"What is the opposite of LEFT?", o:["Right","Down","Up"], c:0}
+  ];
+  var RHYME_POOL = [
+    {p:"Which word rhymes with CAT?", o:["Hat","Dog","Sun"], c:0},
+    {p:"Which word rhymes with SUN?", o:["Fun","Bed","Cup"], c:0},
+    {p:"Which word rhymes with DOG?", o:["Log","Cat","Hen"], c:0},
+    {p:"Which word rhymes with HEN?", o:["Pen","Cow","Fox"], c:0},
+    {p:"Which word rhymes with STAR?", o:["Car","Moon","Tree"], c:0},
+    {p:"Which word rhymes with BEE?", o:["Sea","Dog","Cup"], c:0},
+    {p:"Which word rhymes with FROG?", o:["Jog","Cat","Sun"], c:0},
+    {p:"Which word rhymes with MOON?", o:["Spoon","Star","Cup"], c:0},
+    {p:"Which word rhymes with BALL?", o:["Wall","Cat","Sun"], c:0},
+    {p:"Which word rhymes with CAKE?", o:["Lake","Dog","Hen"], c:0},
+    {p:"Which word rhymes with BOX?", o:["Fox","Cup","Sun"], c:0},
+    {p:"Which word rhymes with KING?", o:["Ring","Dog","Cat"], c:0},
+    {p:"Which word rhymes with PIG?", o:["Wig","Sun","Cup"], c:0},
+    {p:"Which word rhymes with SNAKE?", o:["Rake","Dog","Sun"], c:0}
+  ];
+  var BODY_POOL = [
+    {p:"Which one do you SEE with?", o:["👀 Eyes","👂 Ears","👃 Nose"], c:0},
+    {p:"Which one do you HEAR with?", o:["👂 Ears","👀 Eyes","👄 Mouth"], c:0},
+    {p:"Which one do you SMELL with?", o:["👃 Nose","👂 Ears","🦶 Feet"], c:0},
+    {p:"Which one do you TASTE with?", o:["👅 Tongue","👀 Eyes","🖐️ Hands"], c:0},
+    {p:"Which one do you WALK with?", o:["🦶 Feet","🖐️ Hands","👀 Eyes"], c:0},
+    {p:"Which one do you HOLD things with?", o:["🖐️ Hands","🦶 Feet","👂 Ears"], c:0},
+    {p:"Which one do you THINK with?", o:["🧠 Brain","👃 Nose","🦶 Feet"], c:0},
+    {p:"Which one do you CHEW with?", o:["🦷 Teeth","👀 Eyes","🖐️ Hands"], c:0},
+    {p:"Which one do you WAVE with?", o:["🖐️ Hands","🦶 Feet","👂 Ears"], c:0},
+    {p:"Which one do you KICK a ball with?", o:["🦶 Feet","🖐️ Hands","👃 Nose"], c:0}
+  ];
+  var FRUITVEG_POOL = [
+    {p:"Which one is a fruit?", o:["🍎 Apple","🥕 Carrot","🥦 Broccoli"], c:0},
+    {p:"Which one is a vegetable?", o:["🥕 Carrot","🍌 Banana","🍇 Grape"], c:0},
+    {p:"Which one is a fruit?", o:["🍌 Banana","🥔 Potato","🌽 Corn"], c:0},
+    {p:"Which one is a vegetable?", o:["🥦 Broccoli","🍊 Orange","🍓 Strawberry"], c:0},
+    {p:"Which one is a fruit?", o:["🍇 Grape","🫑 Pepper","🧅 Onion"], c:0},
+    {p:"Which one is a vegetable?", o:["🥔 Potato","🍍 Pineapple","🍉 Watermelon"], c:0},
+    {p:"Which one is a fruit?", o:["🍊 Orange","🌽 Corn","🥕 Carrot"], c:0},
+    {p:"Which one is a vegetable?", o:["🌽 Corn","🍎 Apple","🥭 Mango"], c:0},
+    {p:"Which one is a fruit?", o:["🍓 Strawberry","🧅 Onion","🥦 Broccoli"], c:0},
+    {p:"Which one is a vegetable?", o:["🫑 Pepper","🍇 Grape","🍌 Banana"], c:0},
+    {p:"Which one is a fruit?", o:["🍍 Pineapple","🥔 Potato","🧅 Onion"], c:0},
+    {p:"Which one is a vegetable?", o:["🧅 Onion","🍊 Orange","🍓 Strawberry"], c:0},
+    {p:"Which one is a fruit?", o:["🥭 Mango","🥦 Broccoli","🌽 Corn"], c:0},
+    {p:"Which one is a vegetable?", o:["🥕 Carrot","🍍 Pineapple","🍇 Grape"], c:0}
+  ];
+  var ODDONEOUT_POOL = [
+    {p:"Which one doesn't belong?", o:["🍎 Apple","🍌 Banana","🍇 Grape","🚗 Car"], c:3},
+    {p:"Which one doesn't belong?", o:["🐶 Dog","🐱 Cat","🐭 Mouse","🚌 Bus"], c:3},
+    {p:"Which one doesn't belong?", o:["⚽ Soccer ball","🏀 Basketball","🎾 Tennis ball","📚 Book"], c:3},
+    {p:"Which one doesn't belong?", o:["🚗 Car","🚌 Bus","🚲 Bike","🍎 Apple"], c:3},
+    {p:"Which one doesn't belong?", o:["🌞 Sun","🌧️ Rain","❄️ Snow","🐘 Elephant"], c:3},
+    {p:"Which one doesn't belong?", o:["🔺 Triangle","⭐ Star","⚪ Circle","🐕 Dog"], c:3},
+    {p:"Which one doesn't belong?", o:["🎸 Guitar","🎹 Piano","🥁 Drums","🍕 Pizza"], c:3},
+    {p:"Which one doesn't belong?", o:["🪑 Chair","🛏️ Bed","🛋️ Sofa","🦋 Butterfly"], c:3},
+    {p:"Which one doesn't belong?", o:["✏️ Pencil","📏 Ruler","📖 Book","🍌 Banana"], c:3},
+    {p:"Which one doesn't belong?", o:["🦁 Lion","🐯 Tiger","🐻 Bear","🚀 Rocket"], c:3},
+    {p:"Which one doesn't belong?", o:["🌹 Rose","🌻 Sunflower","🌷 Tulip","🚲 Bike"], c:3},
+    {p:"Which one doesn't belong?", o:["🍕 Pizza","🍔 Burger","🌭 Hot dog","👟 Shoe"], c:3},
+    {p:"Which one doesn't belong?", o:["👕 Shirt","👖 Pants","🧦 Socks","🍉 Watermelon"], c:3},
+    {p:"Which one doesn't belong?", o:["🚂 Train","✈️ Airplane","🚢 Ship","🐟 Fish"], c:3}
+  ];
+  var WEATHER_POOL = [
+    {p:"What do you wear when it's raining?", o:["☔ Raincoat","🕶️ Sunglasses","🧣 Scarf"], c:0},
+    {p:"What do you wear when it's sunny and bright?", o:["🕶️ Sunglasses","🧤 Mittens","☂️ Umbrella"], c:0},
+    {p:"What do you wear when it's snowy?", o:["🧤 Mittens","🩴 Sandals","🕶️ Sunglasses"], c:0},
+    {p:"What might you carry when it's raining?", o:["☂️ Umbrella","🏖️ Beach ball","🕶️ Sunglasses"], c:0},
+    {p:"What do you wear when it's cold outside?", o:["🧥 Jacket","🩱 Swimsuit","🩴 Flip-flops"], c:0},
+    {p:"What do you see in the sky after it rains?", o:["🌈 Rainbow","☀️ Sun only","❄️ Snowflake"], c:0},
+    {p:"What falls from the sky when it's very cold?", o:["❄️ Snow","🌧️ Rain","☀️ Sunshine"], c:0},
+    {p:"What do you wear on a hot summer day at the beach?", o:["🩱 Swimsuit","🧥 Winter coat","🧤 Mittens"], c:0},
+    {p:"What do strong winds make you want to hold onto?", o:["🧥 Your hat","🍦 Ice cream","📖 A book"], c:0},
+    {p:"What do you use to stay dry in a storm?", o:["☔ Raincoat","🕶️ Sunglasses","🩴 Sandals"], c:0}
+  ];
+  var DAYNIGHT_POOL = [
+    {p:"Which one do we see at night?", o:["🌙 Moon","☀️ Sun","🌈 Rainbow"], c:0},
+    {p:"Which one do we see in the day?", o:["☀️ Sun","🌙 Moon","⭐ Stars"], c:0},
+    {p:"What twinkles in the night sky?", o:["⭐ Stars","🌞 Sun","🌈 Rainbow"], c:0},
+    {p:"Which animal is famous for being awake at night?", o:["🦉 Owl","🐔 Rooster","🐦 Sparrow"], c:0},
+    {p:"What does a rooster do in the morning?", o:["Crows loudly","Sleeps all day","Hides at night"], c:0},
+    {p:"When do you usually eat breakfast?", o:["Morning","Midnight","Late night"], c:0},
+    {p:"What do we use to see in a dark room?", o:["🔦 Flashlight","🕶️ Sunglasses","☔ Umbrella"], c:0},
+    {p:"When do most people go to sleep?", o:["Night","Noon","Breakfast time"], c:0},
+    {p:"What lights up the sky during the day?", o:["☀️ The Sun","🌙 The Moon","⭐ Stars"], c:0},
+    {p:"Fireflies are best known for glowing when?", o:["At night","At noon","During breakfast"], c:0}
+  ];
+  function gameAnimalSounds(){ bankGame('animalsounds','Animal Sounds Safari', ANIMAL_SOUNDS_POOL, "You matched every animal sound!"); }
+  function gameOpposites(){ bankGame('opposites','Opposite Land', OPPOSITES_POOL, "You mastered opposites!"); }
+  function gameRhyme(){ bankGame('rhyme','Rhyme Time', RHYME_POOL, "You found every rhyme!"); }
+  function gameBody(){ bankGame('body','Body Buddies', BODY_POOL, "You know your body well!"); }
+  function gameFruitVeg(){ bankGame('fruitveg','Fruit & Veggie Sort', FRUITVEG_POOL, "You sorted the whole basket!"); }
+  function gameOddOneOut(){ bankGame('oddoneout','Odd One Out', ODDONEOUT_POOL, "Great spotting!"); }
+  function gameWeather(){ bankGame('weather','Weather Wise', WEATHER_POOL, "You're a weather expert!"); }
+  function gameDayNight(){ bankGame('daynight','Day & Night Detective', DAYNIGHT_POOL, "Case closed, detective!"); }
+  function genPattern(){
+    var palettes = [ ['🔴','🔵'], ['🟥','🟩','🟦'], ['⭐','🌙'], ['🍎','🍌'], ['🐱','🐶','🐰'] ];
+    var palette = palettes[randInt(0,palettes.length-1)];
+    var period = palette.length;
+    var totalLen = period*2 + randInt(0,1);
+    var seq = [];
+    for(var i=0;i<totalLen;i++) seq.push(palette[i%period]);
+    var next = palette[totalLen%period];
+    var extra = ['🟣','🟡','🟠','🍇','🐸','⚽'].filter(function(s){ return palette.indexOf(s) === -1; });
+    var distractors = palette.filter(function(s){ return s !== next; }).slice(0,1);
+    while(distractors.length < 2){
+      var d = extra[randInt(0,extra.length-1)];
+      if(distractors.indexOf(d) === -1 && d !== next) distractors.push(d);
+    }
+    var mo = makeOptions(next, distractors.slice(0,2));
+    return { p:'What comes next in the pattern? ' + seq.join(' '), o:mo.o, c:mo.c };
+  }
+  function gamePattern(){ proceduralGame('pattern','Pattern Party', genPattern, "You completed every pattern!"); }
+
+  /* ============ CHALLENGE ZONE: procedural games ============ */
+  function genTimesTable(){
+    var a = randInt(2,12), b = randInt(2,12), ans = a*b;
+    var distractors = [];
+    while(distractors.length < 2){
+      var d = ans + (randInt(0,1)?1:-1) * randInt(1,10);
+      if(d > 0 && d !== ans && distractors.indexOf(d) === -1) distractors.push(d);
+    }
+    var mo = makeOptions(ans, distractors);
+    return { p:'What is ' + a + ' × ' + b + ' ?', o:mo.o, c:mo.c };
+  }
+  function genFraction(){
+    var denomsPool = [2,3,4,5,6,8,10];
+    var d1 = pickOne(denomsPool), n1 = randInt(1,d1-1);
+    var d2 = pickOne(denomsPool), n2 = randInt(1,d2-1);
+    var left = n1/d1, right = n2/d2;
+    var options = [n1+'/'+d1+' is bigger', n2+'/'+d2+' is bigger', 'They are equal'];
+    var c = Math.abs(left-right) < 0.0001 ? 2 : (left > right ? 0 : 1);
+    return { p:'Which is bigger: ' + n1+'/'+d1 + ' or ' + n2+'/'+d2 + '?', o:options, c:c };
+  }
+  function genPercent(){
+    var pcts = [10,20,25,50,75,5];
+    var p = pickOne(pcts);
+    var base = (p===25||p===75) ? randInt(1,10)*4 : ((p===5||p===10) ? randInt(2,20)*10 : randInt(1,10)*2);
+    var ans = Math.round(base*p/100);
+    var distractors = [];
+    while(distractors.length < 2){
+      var d = ans + (randInt(0,1)?1:-1) * randInt(1, Math.max(2, Math.round(ans*0.3)+1));
+      if(d >= 0 && d !== ans && distractors.indexOf(d) === -1) distractors.push(d);
+    }
+    var mo = makeOptions(ans, distractors);
+    return { p:'What is ' + p + '% of ' + base + '?', o:mo.o, c:mo.c };
+  }
+  function genAlgebra(){
+    var type = randInt(0,2), x, a, b, ptxt;
+    if(type === 0){ x = randInt(1,12); a = randInt(1,15); b = x+a; ptxt = 'x + ' + a + ' = ' + b; }
+    else if(type === 1){ x = randInt(1,12); a = randInt(1,15); b = x-a; ptxt = 'x − ' + a + ' = ' + b; }
+    else { a = randInt(2,10); x = randInt(1,10); b = a*x; ptxt = a + ' × x = ' + b; }
+    var distractors = [];
+    while(distractors.length < 2){
+      var d = x + (randInt(0,1)?1:-1) * randInt(1,5);
+      if(d >= 0 && d !== x && distractors.indexOf(d) === -1) distractors.push(d);
+    }
+    var mo = makeOptions(x, distractors);
+    return { p:'Solve for x: ' + ptxt, o:mo.o, c:mo.c };
+  }
+  function genGeometry(){
+    var l = randInt(2,15), w = randInt(2,15);
+    var askArea = Math.random() < 0.5;
+    var ans = askArea ? l*w : 2*(l+w);
+    var distractors = [askArea ? 2*(l+w) : l*w];
+    while(distractors.length < 2){
+      var d = ans + (randInt(0,1)?1:-1) * randInt(1,6);
+      if(d > 0 && d !== ans && distractors.indexOf(d) === -1) distractors.push(d);
+    }
+    var mo = makeOptions(ans, distractors.slice(0,2));
+    var unit = askArea ? ' cm²' : ' cm';
+    return { p:'A rectangle is ' + l + ' cm long and ' + w + ' cm wide. What is its ' + (askArea?'area':'perimeter') + '?',
+      o: mo.o.map(function(v){ return v + unit; }), c: mo.c };
+  }
+  function genSequence(){
+    var arith = Math.random() < 0.7;
+    var seq = [], next, distractors;
+    if(arith){
+      var start = randInt(1,10), step = randInt(2,7) * (Math.random()<0.2 ? -1 : 1);
+      for(var i=0;i<4;i++) seq.push(start+i*step);
+      next = start + 4*step;
+      distractors = [next+step, next-step];
+    } else {
+      var s0 = randInt(1,4), ratio = randInt(2,3);
+      for(var i2=0;i2<4;i2++) seq.push(s0 * Math.pow(ratio,i2));
+      next = s0 * Math.pow(ratio,4);
+      distractors = [next+ratio, Math.round(next/ratio)];
+    }
+    distractors = distractors.filter(function(d, idx, arr){ return d !== next && arr.indexOf(d) === idx; });
+    while(distractors.length < 2){
+      var d2 = next + randInt(1,5) * (Math.random()<0.5?-1:1);
+      if(d2 !== next && d2 >= 0 && distractors.indexOf(d2) === -1) distractors.push(d2);
+    }
+    var mo = makeOptions(next, distractors.slice(0,2));
+    return { p:'What comes next? ' + seq.join(', ') + ', __', o:mo.o, c:mo.c };
+  }
+  function genPrime(){
+    var primesPool = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
+    var compositePool = [4,6,8,9,10,12,14,15,16,18,20,21,22,24,25,26,27,28];
+    var primeVal = pickOne(primesPool);
+    var c1 = pickOne(compositePool);
+    var c2; do { c2 = pickOne(compositePool); } while(c2 === c1);
+    var mo = makeOptions(primeVal, [c1,c2]);
+    return { p:'Which of these numbers is prime?', o:mo.o, c:mo.c };
+  }
+  function genRoman(){
+    function toRoman(num){
+      var vals=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+      var syms=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+      var res=''; for(var i=0;i<vals.length;i++){ while(num>=vals[i]){ res+=syms[i]; num-=vals[i]; } }
+      return res;
+    }
+    var val = randInt(1,49);
+    var roman = toRoman(val);
+    var distractors = [];
+    while(distractors.length < 2){
+      var d = val + (randInt(0,1)?1:-1) * randInt(1,5);
+      if(d > 0 && d !== val && distractors.indexOf(d) === -1) distractors.push(d);
+    }
+    var mo = makeOptions(val, distractors);
+    return { p:'What number is ' + roman + ' in Roman numerals?', o:mo.o, c:mo.c };
+  }
+  function gameTimesTable(){ proceduralGame('timestable','Times Table Trainer', genTimesTable, "You trained your times tables!"); }
+  function gameFraction(){ proceduralGame('fraction','Fraction Fixer', genFraction, "You fixed every fraction!"); }
+  function gamePercent(){ proceduralGame('percent','Percent Power', genPercent, "You powered through percentages!"); }
+  function gameAlgebra(){ proceduralGame('algebra','Algebra Ace', genAlgebra, "You solved every equation!"); }
+  function gameGeometry(){ proceduralGame('geometry','Geometry Genius', genGeometry, "You measured up perfectly!"); }
+  function gameSequence(){ proceduralGame('sequence','Number Sequence', genSequence, "You cracked every sequence!"); }
+  function gamePrime(){ proceduralGame('prime','Prime Number Patrol', genPrime, "Prime patrol complete!"); }
+  function gameRoman(){ proceduralGame('roman','Roman Numeral Rally', genRoman, "You rallied through Roman numerals!"); }
+
+  /* ============ CHALLENGE ZONE: Typing Trainer (custom, live keystroke feedback) ============ */
+  var TYPING_POOL = [
+    "the quick fox", "jump so high", "bright stars", "keyboard practice", "friendly robot",
+    "purple elephant", "rainy afternoon", "golden sunset", "adventure awaits", "curious mind",
+    "gentle breeze", "mountain climb", "ocean waves", "silent forest", "dancing flames",
+    "winter morning", "brave explorer", "singing birds", "quiet library", "colorful garden"
+  ];
+  function gameTyping(){
+    enterGameScreen('Typing Trainer');
+    makeProgressPips();
+    var roundIndex = 0, starsEarned = 0, queue = [], startTime = null, warnedThisRound = false;
+
+    function nextRound(){
+      if(roundIndex === 0){ queue = makeQueue(TYPING_POOL, ROUNDS_PER_GAME); startTime = Date.now(); }
+      if(roundIndex >= ROUNDS_PER_GAME){
+        var elapsedMin = Math.max(0.05, (Date.now() - startTime) / 60000);
+        var totalChars = queue.reduce(function(sum, w){ return sum + w.length; }, 0);
+        var wpm = Math.max(1, Math.round((totalChars / 5) / elapsedMin));
+        showCompletion('typing', starsEarned, "You typed your way through every word! (about " + wpm + " WPM)", function(){
+          roundIndex = 0; starsEarned = 0; makeProgressPips(); nextRound();
+        });
+        return;
+      }
+      showRoundInfo(roundIndex);
+      stage.innerHTML = '';
+      warnedThisRound = false;
+      var target = queue[roundIndex];
+
+      var prompt = document.createElement('div');
+      prompt.className = 'prompt';
+      prompt.innerHTML = 'Type the words below exactly as you see them:';
+      stage.appendChild(prompt);
+
+      var display = document.createElement('div');
+      display.className = 'typing-target';
+      target.split('').forEach(function(ch){
+        var span = document.createElement('span');
+        span.className = 'tchar pending';
+        span.textContent = ch;
+        display.appendChild(span);
+      });
+      stage.appendChild(display);
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'typing-input';
+      input.autocomplete = 'off';
+      input.autocapitalize = 'off';
+      input.spellcheck = false;
+      stage.appendChild(input);
+      input.focus();
+
+      input.addEventListener('input', function(){
+        var val = input.value;
+        var spans = display.querySelectorAll('.tchar');
+        for(var i=0;i<spans.length;i++){
+          if(i >= val.length){ spans[i].className = 'tchar pending'; }
+          else if(val[i] === target[i]){ spans[i].className = 'tchar correct'; }
+          else { spans[i].className = 'tchar wrong'; }
+        }
+        if(val === target){
+          input.disabled = true;
+          markPipDone(roundIndex);
+          starsEarned += 1;
+          addTotalStars(1);
+          playCartoon('correct');
+          mascotSay(pickOne(["Fantastic typing!", "Speedy fingers!", "Perfectly typed!", "You nailed it!"]));
+          setTimeout(function(){ roundIndex += 1; nextRound(); }, 700);
+        } else if(val.length >= target.length && !warnedThisRound){
+          warnedThisRound = true;
+          playCartoon('wrong');
+          input.classList.add('is-wrong');
+          mascotSay(pickOne(["So close — check the highlighted letters!", "Almost — fix the red letters!", "Keep going, you're nearly there!"]));
+          setTimeout(function(){ input.classList.remove('is-wrong'); }, 420);
+        }
+      });
+    }
+    nextRound();
+  }
+
+  /* ============ CHALLENGE ZONE: Speed Typing Challenge (60-second timed typing test) ============ */
+  var SPEED_WORDS = [
+    "apple","garden","school","planet","river","yellow","circle","laptop","bridge","forest",
+    "pencil","rocket","guitar","window","turtle","castle","dragon","mirror","basket","engine",
+    "summer","winter","spider","candle","bottle","jungle","market","puzzle","wallet","cloudy",
+    "hunger","travel","battle","future","gentle","honest","wisdom","friend","orange","balloon",
+    "whisper","journey","volcano","diamond","thunder","picture","kitchen","triangle","elephant","mountain"
+  ];
+  function gameSpeedTyping(){
+    enterGameScreen('Speed Typing Challenge');
+    progressRow.innerHTML = '';
+    var timeLeft = 60;
+    var wordsCorrect = 0;
+    var currentWord = '';
+    var timerInterval = null;
+    var finished = false;
+
+    function pickWord(){
+      var w;
+      do { w = pickOne(SPEED_WORDS); } while(w === currentWord && SPEED_WORDS.length > 1);
+      currentWord = w;
+    }
+
+    function renderStage(){
+      roundInfoEl.textContent = 'Words typed: ' + wordsCorrect;
+      stage.innerHTML = '';
+
+      var timerDiv = document.createElement('div');
+      timerDiv.className = 'speed-timer' + (timeLeft <= 10 ? ' urgent' : '');
+      timerDiv.id = 'speed-timer';
+      timerDiv.textContent = '⏱ ' + timeLeft + 's';
+      stage.appendChild(timerDiv);
+
+      var prompt = document.createElement('div');
+      prompt.className = 'prompt';
+      prompt.innerHTML = 'Type each word as fast as you can!';
+      stage.appendChild(prompt);
+
+      var display = document.createElement('div');
+      display.className = 'typing-target';
+      currentWord.split('').forEach(function(ch){
+        var span = document.createElement('span');
+        span.className = 'tchar pending';
+        span.textContent = ch;
+        display.appendChild(span);
+      });
+      stage.appendChild(display);
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'typing-input';
+      input.autocomplete = 'off';
+      input.autocapitalize = 'off';
+      input.spellcheck = false;
+      stage.appendChild(input);
+      input.focus();
+
+      input.addEventListener('input', function(){
+        if(finished) return;
+        var val = input.value;
+        var spans = display.querySelectorAll('.tchar');
+        for(var i=0;i<spans.length;i++){
+          if(i >= val.length){ spans[i].className = 'tchar pending'; }
+          else if(val[i] === currentWord[i]){ spans[i].className = 'tchar correct'; }
+          else { spans[i].className = 'tchar wrong'; }
+        }
+        if(val === currentWord){
+          wordsCorrect += 1;
+          playCartoon('correct');
+          pickWord();
+          renderStage();
+        }
+      });
+    }
+
+    function tick(){
+      if(gameScreen.classList.contains('hidden')){ clearInterval(timerInterval); return; }
+      timeLeft -= 1;
+      var timerEl = document.getElementById('speed-timer');
+      if(timerEl){
+        timerEl.textContent = '⏱ ' + timeLeft + 's';
+        if(timeLeft <= 10) timerEl.classList.add('urgent');
+      }
+      if(timeLeft <= 0){
+        clearInterval(timerInterval);
+        finishSpeedRound();
+      }
+    }
+
+    function finishSpeedRound(){
+      finished = true;
+      var starsEarned = Math.min(8, Math.floor(wordsCorrect / 2));
+      addTotalStars(starsEarned);
+      showCompletion('speedtyping', starsEarned, "Time's up! You typed " + wordsCorrect + " word" + (wordsCorrect===1?'':'s') + " correctly (~" + wordsCorrect + " WPM).", function(){
+        gameSpeedTyping();
+      });
+    }
+
+    pickWord();
+    renderStage();
+    timerInterval = setInterval(tick, 1000);
+  }
+
+  /* ============ CHALLENGE ZONE: Bible Quiz ============ */
+  var BIBLE_POOL = [
+    {p:"Who built a large ark to survive a great flood?", o:["Noah","Moses","Abraham"], c:0},
+    {p:"Who defeated the giant Goliath with a sling and a stone?", o:["David","Samson","Joshua"], c:0},
+    {p:"What did God create on the very first day, according to the Genesis story?", o:["Light","Animals","The sun"], c:0},
+    {p:"Who led the Israelites out of slavery in Egypt?", o:["Moses","David","Solomon"], c:0},
+    {p:"What sea did Moses part so the Israelites could cross?", o:["The Red Sea","The Dead Sea","The Mediterranean Sea"], c:0},
+    {p:"Who was swallowed by a great fish after running from God?", o:["Jonah","Daniel","Elijah"], c:0},
+    {p:"How many days and nights did it rain during the great flood?", o:["40","7","100"], c:0},
+    {p:"Who was thrown into a den of lions but was kept safe?", o:["Daniel","Job","Peter"], c:0},
+    {p:"What were the Ten Commandments written on, according to the story?", o:["Stone tablets","Scrolls of paper","A wooden board"], c:0},
+    {p:"In the story of the Good Samaritan, who stopped to help the injured traveler?", o:["A Samaritan","A priest","A Levite"], c:0},
+    {p:"What town was Jesus born in?", o:["Bethlehem","Nazareth","Jerusalem"], c:0},
+    {p:"Who was Jesus' mother?", o:["Mary","Martha","Elizabeth"], c:0},
+    {p:"How many disciples did Jesus choose to follow him closely?", o:["12","10","7"], c:0},
+    {p:"What did Jesus multiply, along with a few fish, to feed a large crowd?", o:["Loaves of bread","Baskets of fruit","Jars of oil"], c:0}
+  ];
+  function gameBible(){ bankGame('bible','Bible Quiz', BIBLE_POOL, "You know your Bible stories well!"); }
+
+  /* ============ CHALLENGE ZONE: curated bank games ============ */
+  var GRAMMAR_POOL = [
+    {p:"\"The dog barked loudly.\" Which word is the verb?", o:["dog","barked","loudly"], c:1},
+    {p:"\"She quickly finished her homework.\" Which word is the adverb?", o:["quickly","finished","homework"], c:0},
+    {p:"\"The bright red car sped away.\" Which word is the adjective?", o:["bright","sped","away"], c:0},
+    {p:"\"Birds fly south in winter.\" Which word is the noun?", o:["fly","south","birds"], c:2},
+    {p:"\"He carefully painted the fence.\" Which word is the adverb?", o:["carefully","painted","fence"], c:0},
+    {p:"\"The tall giraffe ate leaves.\" Which word is the adjective?", o:["tall","ate","leaves"], c:0},
+    {p:"\"They travel to Japan next year.\" Which word is the verb?", o:["travel","Japan","year"], c:0},
+    {p:"\"The old wooden bridge creaked.\" Which word is the adjective?", o:["old","bridge","creaked"], c:0},
+    {p:"\"My sister sings beautifully.\" Which word is the adverb?", o:["sister","sings","beautifully"], c:2},
+    {p:"\"The children played happily in the park.\" Which word is the noun?", o:["played","happily","children"], c:2},
+    {p:"\"A gentle breeze cooled the room.\" Which word is the adjective?", o:["gentle","breeze","cooled"], c:0},
+    {p:"\"The cat quickly climbed the tree.\" Which word is the verb?", o:["cat","quickly","climbed"], c:2},
+    {p:"\"Our teacher explained the lesson clearly.\" Which word is the adverb?", o:["teacher","explained","clearly"], c:2},
+    {p:"\"The enormous elephant walked slowly.\" Which word is the adjective?", o:["enormous","walked","slowly"], c:0}
+  ];
+  var VOCAB_POOL = [
+    {p:"Which word means the same as HAPPY?", o:["Joyful","Angry","Tired"], c:0},
+    {p:"Which word means the same as BEGIN?", o:["Start","End","Stop"], c:0},
+    {p:"Which word means the same as SMART?", o:["Clever","Silly","Slow"], c:0},
+    {p:"Which word means the same as QUIET?", o:["Silent","Loud","Fast"], c:0},
+    {p:"Which word means the same as TINY?", o:["Small","Huge","Wide"], c:0},
+    {p:"Which word means the same as BRAVE?", o:["Courageous","Scared","Weak"], c:0},
+    {p:"Which word means the same as ANGRY?", o:["Furious","Calm","Happy"], c:0},
+    {p:"Which word means the same as QUICK?", o:["Fast","Slow","Lazy"], c:0},
+    {p:"Which word means the same as HUGE?", o:["Enormous","Tiny","Narrow"], c:0},
+    {p:"Which word means the same as GLAD?", o:["Pleased","Upset","Bored"], c:0},
+    {p:"Which word means the same as ODD?", o:["Strange","Normal","Boring"], c:0},
+    {p:"Which word means the same as SIMPLE?", o:["Easy","Hard","Complex"], c:0},
+    {p:"Which word means the same as FIX?", o:["Repair","Break","Ignore"], c:0},
+    {p:"Which word means the same as SHOUT?", o:["Yell","Whisper","Sing"], c:0}
+  ];
+  var ANTONYM_POOL = [
+    {p:"What is the opposite of BRAVE?", o:["Cowardly","Strong","Fast"], c:0},
+    {p:"What is the opposite of HAPPY?", o:["Sad","Joyful","Excited"], c:0},
+    {p:"What is the opposite of FAST?", o:["Slow","Quick","Rapid"], c:0},
+    {p:"What is the opposite of BIG?", o:["Small","Large","Huge"], c:0},
+    {p:"What is the opposite of HOT?", o:["Cold","Warm","Mild"], c:0},
+    {p:"What is the opposite of EASY?", o:["Difficult","Simple","Basic"], c:0},
+    {p:"What is the opposite of LIGHT?", o:["Heavy","Bright","Dim"], c:0},
+    {p:"What is the opposite of OPEN?", o:["Closed","Wide","Ajar"], c:0},
+    {p:"What is the opposite of ABOVE?", o:["Below","Over","Up"], c:0},
+    {p:"What is the opposite of ANCIENT?", o:["Modern","Old","Historic"], c:0},
+    {p:"What is the opposite of GENEROUS?", o:["Selfish","Kind","Giving"], c:0},
+    {p:"What is the opposite of ARRIVE?", o:["Depart","Enter","Reach"], c:0},
+    {p:"What is the opposite of INCREASE?", o:["Decrease","Grow","Expand"], c:0},
+    {p:"What is the opposite of POLITE?", o:["Rude","Kind","Gentle"], c:0}
+  ];
+  var SCIENCE_POOL = [
+    {p:"What gas do plants absorb from the air?", o:["Carbon Dioxide","Oxygen","Nitrogen"], c:0},
+    {p:"What is the center of an atom called?", o:["Nucleus","Electron","Proton"], c:0},
+    {p:"What force pulls objects toward Earth?", o:["Gravity","Magnetism","Friction"], c:0},
+    {p:"What do we call water in its solid form?", o:["Ice","Steam","Vapor"], c:0},
+    {p:"Which organ pumps blood through your body?", o:["Heart","Lungs","Liver"], c:0},
+    {p:"What is the process by which plants make food called?", o:["Photosynthesis","Respiration","Digestion"], c:0},
+    {p:"What is the boiling point of water in Celsius?", o:["100°C","50°C","212°C"], c:0},
+    {p:"Which gas do humans need to breathe to survive?", o:["Oxygen","Carbon Dioxide","Helium"], c:0},
+    {p:"What do you call an animal that eats only plants?", o:["Herbivore","Carnivore","Omnivore"], c:0},
+    {p:"What is the smallest unit of life called?", o:["Cell","Atom","Organ"], c:0},
+    {p:"Which force slows down moving objects?", o:["Friction","Gravity","Magnetism"], c:0},
+    {p:"What do we call the gas layer surrounding Earth?", o:["Atmosphere","Crust","Core"], c:0},
+    {p:"What type of energy comes from the sun?", o:["Solar energy","Wind energy","Nuclear energy"], c:0},
+    {p:"Which state of matter has a fixed shape and volume?", o:["Solid","Liquid","Gas"], c:0}
+  ];
+  var SPACE_POOL = [
+    {p:"Which planet is known as the Red Planet?", o:["Mars","Venus","Jupiter"], c:0},
+    {p:"What is the closest planet to the Sun?", o:["Mercury","Earth","Mars"], c:0},
+    {p:"What is the largest planet in our solar system?", o:["Jupiter","Saturn","Earth"], c:0},
+    {p:"What do we call a group of stars that forms a pattern?", o:["Constellation","Galaxy","Nebula"], c:0},
+    {p:"What is the name of our galaxy?", o:["Milky Way","Andromeda","Orion"], c:0},
+    {p:"What causes day and night on Earth?", o:["Earth's rotation","Earth's orbit","The Moon"], c:0},
+    {p:"How many planets are in our solar system?", o:["8","9","7"], c:0},
+    {p:"What is the closest star to Earth?", o:["The Sun","Proxima Centauri","Sirius"], c:0},
+    {p:"Which planet has famous rings?", o:["Saturn","Mars","Mercury"], c:0},
+    {p:"What do astronauts wear to breathe in space?", o:["Spacesuit","Wetsuit","Regular clothes"], c:0},
+    {p:"What is a shooting star actually?", o:["A meteor","A comet","A planet"], c:0},
+    {p:"What causes the phases of the Moon?", o:["Its position relative to Earth and Sun","Clouds","Earthquakes"], c:0},
+    {p:"Which planet is extremely hot due to its thick atmosphere?", o:["Venus","Neptune","Uranus"], c:0},
+    {p:"What is the term for a planet's path around the Sun?", o:["Orbit","Rotation","Axis"], c:0}
+  ];
+  var GEO_POOL = [
+    {p:"What is the capital of France?", o:["Paris","Rome","Madrid"], c:0},
+    {p:"What is the capital of Japan?", o:["Tokyo","Beijing","Seoul"], c:0},
+    {p:"What is the capital of Egypt?", o:["Cairo","Nairobi","Lagos"], c:0},
+    {p:"What is the capital of Canada?", o:["Ottawa","Toronto","Vancouver"], c:0},
+    {p:"What is the capital of Australia?", o:["Canberra","Sydney","Melbourne"], c:0},
+    {p:"What is the capital of Brazil?", o:["Brasília","Rio de Janeiro","São Paulo"], c:0},
+    {p:"What is the capital of Germany?", o:["Berlin","Munich","Hamburg"], c:0},
+    {p:"What is the capital of Nigeria?", o:["Abuja","Lagos","Kano"], c:0},
+    {p:"What is the capital of India?", o:["New Delhi","Mumbai","Bangalore"], c:0},
+    {p:"What is the capital of Russia?", o:["Moscow","St. Petersburg","Kazan"], c:0},
+    {p:"What is the capital of Mexico?", o:["Mexico City","Guadalajara","Cancún"], c:0},
+    {p:"What is the capital of Italy?", o:["Rome","Milan","Venice"], c:0},
+    {p:"What is the capital of South Korea?", o:["Seoul","Busan","Incheon"], c:0},
+    {p:"What is the capital of the United Kingdom?", o:["London","Manchester","Liverpool"], c:0}
+  ];
+  var HISTORY_POOL = [
+    {p:"Who was the first President of the United States?", o:["George Washington","Abraham Lincoln","Thomas Jefferson"], c:0},
+    {p:"Which ancient civilization built the pyramids of Giza?", o:["Ancient Egyptians","Ancient Romans","Ancient Greeks"], c:0},
+    {p:"Which ancient wonder was located in Egypt?", o:["The Great Pyramid","The Colosseum","The Great Wall"], c:0},
+    {p:"Which explorer is credited with reaching the Americas in 1492?", o:["Christopher Columbus","Marco Polo","Ferdinand Magellan"], c:0},
+    {p:"Which ancient civilization is known for the Colosseum?", o:["Ancient Rome","Ancient Egypt","Ancient Greece"], c:0},
+    {p:"What wall separated East and West Berlin during the Cold War?", o:["The Berlin Wall","The Great Wall","Hadrian's Wall"], c:0},
+    {p:"Which country built the Great Wall?", o:["China","Japan","Mongolia"], c:0},
+    {p:"Who developed the theory of relativity?", o:["Albert Einstein","Isaac Newton","Galileo Galilei"], c:0},
+    {p:"What famous ship sank in 1912?", o:["The Titanic","The Mayflower","The Santa Maria"], c:0},
+    {p:"Which ancient civilization used hieroglyphics?", o:["Ancient Egyptians","Ancient Aztecs","Ancient Vikings"], c:0},
+    {p:"Who was known as the 'Maid of Orléans' in French history?", o:["Joan of Arc","Marie Antoinette","Catherine the Great"], c:0},
+    {p:"Which empire was ruled by Julius Caesar?", o:["The Roman Empire","The Ottoman Empire","The British Empire"], c:0},
+    {p:"In which century did the Wright brothers achieve powered flight?", o:["20th century","19th century","18th century"], c:0},
+    {p:"Which document begins with 'We the People'?", o:["The U.S. Constitution","The Magna Carta","The Declaration of Independence"], c:0}
+  ];
+  function gameGrammar(){ bankGame('grammar','Grammar Guru', GRAMMAR_POOL, "Grammar mastered!"); }
+  function gameVocab(){ bankGame('vocab','Vocabulary Vault', VOCAB_POOL, "Your vocabulary is amazing!"); }
+  function gameAntonym(){ bankGame('antonym','Antonym Arena', ANTONYM_POOL, "You conquered the arena!"); }
+  function gameScience(){ bankGame('science','Science Lab', SCIENCE_POOL, "Science superstar!"); }
+  function gameSpace(){ bankGame('space','Space Explorer', SPACE_POOL, "You explored the whole galaxy!"); }
+  function gameGeography(){ bankGame('geography','World Geography', GEO_POOL, "You're a geography champion!"); }
+  function gameHistory(){ bankGame('history','History Hunt', HISTORY_POOL, "History mastered!"); }
+
+  /* ============ registry ============ */
+  var THEME_CYCLE = ['theme-abc','theme-count','theme-shape','theme-color','theme-memory','theme-math'];
+
+  var GAMES = [
+    { id:'abc', category:'explorer', icon:'🐝', title:'Bumble ABC', desc:'Match big letters to their little letter friends.', start:gameABC },
+    { id:'count', category:'explorer', icon:'🎈', title:'Counting Carnival', desc:'Count the balloons, berries and more!', start:gameCounting },
+    { id:'shape', category:'explorer', icon:'🔺', title:'Shape Meadow', desc:'Spot the shape that matches its twin.', start:gameShapes },
+    { id:'color', category:'explorer', icon:'🎨', title:'Color Garden', desc:'Match colors and their names.', start:gameColors },
+    { id:'memory', category:'explorer', icon:'🍄', title:'Memory Meadow', desc:'Flip cards to find matching pairs.', start:gameMemory },
+    { id:'math', category:'explorer', icon:'🍎', title:'Apple Orchard Math', desc:'Add up apples in the orchard.', start:gameMath },
+    { id:'animalsounds', category:'explorer', icon:'🐄', title:'Animal Sounds Safari', desc:'Match the sound to the animal.', start:gameAnimalSounds },
+    { id:'opposites', category:'explorer', icon:'🔁', title:'Opposite Land', desc:'Find the word that means the opposite.', start:gameOpposites },
+    { id:'rhyme', category:'explorer', icon:'🎵', title:'Rhyme Time', desc:'Pick the word that rhymes.', start:gameRhyme },
+    { id:'body', category:'explorer', icon:'🖐️', title:'Body Buddies', desc:'Learn what each body part does.', start:gameBody },
+    { id:'fruitveg', category:'explorer', icon:'🥕', title:'Fruit & Veggie Sort', desc:'Sort fruits from vegetables.', start:gameFruitVeg },
+    { id:'pattern', category:'explorer', icon:'🧩', title:'Pattern Party', desc:'Figure out what comes next.', start:gamePattern },
+    { id:'oddoneout', category:'explorer', icon:'🔍', title:'Odd One Out', desc:'Spot the one that doesn\'t belong.', start:gameOddOneOut },
+    { id:'weather', category:'explorer', icon:'⛅', title:'Weather Wise', desc:'Dress right for the weather.', start:gameWeather },
+    { id:'daynight', category:'explorer', icon:'🌗', title:'Day & Night Detective', desc:'Sort what belongs to day or night.', start:gameDayNight },
+
+    { id:'timestable', category:'challenge', icon:'✖️', title:'Times Table Trainer', desc:'Sharpen your multiplication facts.', start:gameTimesTable },
+    { id:'fraction', category:'challenge', icon:'🍕', title:'Fraction Fixer', desc:'Compare fractions like a pro.', start:gameFraction },
+    { id:'percent', category:'challenge', icon:'💯', title:'Percent Power', desc:'Calculate percentages fast.', start:gamePercent },
+    { id:'algebra', category:'challenge', icon:'🧮', title:'Algebra Ace', desc:'Solve for x in simple equations.', start:gameAlgebra },
+    { id:'geometry', category:'challenge', icon:'📐', title:'Geometry Genius', desc:'Find area and perimeter.', start:gameGeometry },
+    { id:'grammar', category:'challenge', icon:'📝', title:'Grammar Guru', desc:'Identify nouns, verbs and more.', start:gameGrammar },
+    { id:'vocab', category:'challenge', icon:'📚', title:'Vocabulary Vault', desc:'Find words that mean the same.', start:gameVocab },
+    { id:'antonym', category:'challenge', icon:'↔️', title:'Antonym Arena', desc:'Find words with opposite meanings.', start:gameAntonym },
+    { id:'science', category:'challenge', icon:'🔬', title:'Science Lab', desc:'Test your science knowledge.', start:gameScience },
+    { id:'space', category:'challenge', icon:'🪐', title:'Space Explorer', desc:'Explore facts about our solar system.', start:gameSpace },
+    { id:'geography', category:'challenge', icon:'🌍', title:'World Geography', desc:'Match countries to their capitals.', start:gameGeography },
+    { id:'history', category:'challenge', icon:'🏛️', title:'History Hunt', desc:'Discover famous historical facts.', start:gameHistory },
+    { id:'sequence', category:'challenge', icon:'🔢', title:'Number Sequence', desc:'Find the pattern and the next number.', start:gameSequence },
+    { id:'prime', category:'challenge', icon:'🔑', title:'Prime Number Patrol', desc:'Spot the prime numbers.', start:gamePrime },
+    { id:'roman', category:'challenge', icon:'Ⅻ', title:'Roman Numeral Rally', desc:'Decode Roman numerals.', start:gameRoman },
+    { id:'typing', category:'challenge', icon:'⌨️', title:'Typing Trainer', desc:'Type each word or phrase as fast and accurately as you can.', start:gameTyping },
+    { id:'speedtyping', category:'challenge', icon:'⏱️', title:'Speed Typing Challenge', desc:'Type as many words as you can before the 60-second timer runs out.', start:gameSpeedTyping },
+    { id:'bible', category:'challenge', icon:'📖', title:'Bible Quiz', desc:'Test what you know about favorite Bible stories.', start:gameBible }
+  ];
+
+  /* home category cards */
+  var homeGrid = document.getElementById('category-grid-home');
+  ['explorer','challenge'].forEach(function(catId){
+    var info = CATEGORY_INFO[catId];
+    var count = GAMES.filter(function(g){ return g.category === catId; }).length;
+    var card = document.createElement('button');
+    card.className = 'category-card';
+    card.innerHTML =
+      '<div class="category-top ' + info.theme + '"><span class="emoji">' + info.icon + '</span><span class="age">' + info.age + '</span></div>' +
+      '<div class="category-body"><h3>' + info.title + '</h3><p>' + info.desc + '</p><div class="count">' + count + ' games</div></div>';
+    card.addEventListener('click', function(){ showCategory(catId); });
+    homeGrid.appendChild(card);
+  });
+
+  showHome();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>Storybook — Igidigbo Kids World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#2B1B4D; --night2:#4A2E6B; --dusk:#E8935A; --marigold:#F4A93B;
+    --teal:#1F9E7A; --teal-dark:#167A5C; --coral:#E85D4E; --coral-dark:#C8402F;
+    --cream:#FBF3E7; --ink:#2B1B33; --ink-soft:#6B5B73; --gold:#F4C542;
+    --shadow-ink:43,27,51;
+  }
+  *,*::before,*::after{ box-sizing:border-box; }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+  }
+  html,body{ height:100%; }
+  body{
+    margin:0; min-height:100%; font-family:'Nunito',sans-serif; color:var(--cream);
+    background:
+      radial-gradient(2px 2px at 10% 10%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(2px 2px at 25% 6%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 40% 14%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1.5px 1.5px at 65% 8%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(2px 2px at 80% 12%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(2px 2px at 92% 5%, rgba(255,255,255,0.5), transparent),
+      linear-gradient(to bottom, var(--night) 0%, var(--night2) 30%, var(--dusk) 72%, var(--marigold) 100%);
+    background-attachment:fixed; overflow-x:hidden;
+  }
+  button{ font-family:inherit; }
+  a{ color:inherit; }
+  .hidden{ display:none !important; }
+
+  .skyline{ position:fixed; left:0; right:0; bottom:0; height:100px; display:flex; align-items:flex-end; z-index:0; pointer-events:none; opacity:0.45; }
+  .bldg{ background:#1E1435; flex:0 0 auto; margin-right:4px; border-radius:3px 3px 0 0; }
+
+  /* ---------- shared site nav ---------- */
+  .site-nav{
+    display:flex; align-items:center; justify-content:space-between; padding:14px 20px;
+    background:rgba(20,12,38,0.55); backdrop-filter:blur(4px); position:relative; z-index:2;
+  }
+  .site-nav-brand{ font-family:'Lora',serif; font-weight:700; font-size:16px; color:var(--cream); text-decoration:none; display:flex; align-items:center; gap:8px; }
+  .site-nav-links{ display:flex; align-items:center; gap:6px; }
+  .site-nav-links a{
+    text-decoration:none; font-weight:700; font-size:13.5px; color:#E7D9F0; padding:8px 13px; border-radius:12px;
+  }
+  .site-nav-links a.active{ background:rgba(255,255,255,0.16); color:#fff; }
+  .icon-btn{
+    border:none; background:rgba(255,255,255,0.14); color:var(--cream); width:38px; height:38px; border-radius:12px;
+    font-size:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; margin-left:6px;
+  }
+  .icon-btn:active{ transform:translateY(2px); }
+
+  #app{ position:relative; z-index:1; min-height:100%; display:flex; flex-direction:column; }
+  main{ flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 18px 30px; }
+
+  .hero{ text-align:center; max-width:560px; margin:22px auto 6px; }
+  .hero h1{ font-family:'Lora',serif; font-weight:700; font-size:34px; margin:0 0 10px; color:var(--cream); }
+  .hero p{ color:#E7D9F0; font-size:15px; font-weight:600; margin:0; line-height:1.5; }
+
+  /* ---------- library ---------- */
+  .story-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; max-width:920px; margin:26px auto 0; width:100%; }
+  @media (max-width:820px){ .story-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media (max-width:560px){ .story-grid{ grid-template-columns:1fr; max-width:380px; } }
+
+  .search-row{ max-width:520px; width:100%; margin:22px auto 0; }
+  .search-input{
+    width:100%; padding:13px 18px; border-radius:16px; border:none; font-family:'Nunito',sans-serif; font-weight:700;
+    font-size:14.5px; color:var(--ink); background:rgba(255,255,255,0.92);
+  }
+  .search-input:focus{ outline:3px solid var(--gold); }
+  .filter-row{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:820px; margin:16px auto 0; }
+  .filter-pill{
+    border:none; cursor:pointer; background:rgba(255,255,255,0.14); color:#E7D9F0; font-weight:700; font-size:12.5px;
+    padding:9px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.2);
+  }
+  .filter-pill.active{ background:var(--gold); color:var(--ink); border-color:var(--gold); }
+  .grid-empty{ text-align:center; color:#E7D9F0; font-weight:700; font-size:14px; max-width:920px; margin:20px auto 0; }
+
+  .reader-subtitle{ font-size:12.5px; font-weight:800; letter-spacing:0.3px; color:var(--coral-dark); text-transform:uppercase; margin:0 0 8px; }
+  .audio-controls{ display:flex; align-items:center; gap:8px; }
+  .audio-btn.stop{ background:#8A7A63; box-shadow:0 4px 0 #6b5e4b; }
+  .reading-dot{ width:9px; height:9px; border-radius:50%; background:#DDD; flex:0 0 auto; }
+  .reading-dot.on{ background:var(--teal); animation:reading-pulse 1s ease-in-out infinite; }
+  @keyframes reading-pulse{ 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.4; transform:scale(1.4); } }
+
+  .story-nav-row{
+    display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:20px;
+    padding-top:16px; border-top:1px dashed #E7DCCB; flex-wrap:wrap;
+  }
+  .story-nav-btn{
+    border:none; cursor:pointer; background:#F3ECDC; color:var(--ink); font-family:'Nunito',sans-serif; font-weight:700;
+    font-size:12px; padding:9px 13px; border-radius:12px; max-width:38%; text-align:center; line-height:1.3;
+  }
+  .story-nav-btn.mid{ background:var(--marigold); color:#fff; max-width:none; }
+  @media (max-width:480px){
+    .reader-controls{ flex-direction:column; align-items:stretch; }
+    .audio-controls{ justify-content:center; }
+    .nav-btns{ justify-content:space-between; }
+    .story-nav-row{ flex-direction:column; }
+    .story-nav-btn{ max-width:none; width:100%; }
+  }
+  .story-card{
+    border:none; cursor:pointer; text-align:left; padding:0; border-radius:22px; overflow:hidden; background:var(--cream); color:var(--ink);
+    display:flex; flex-direction:column; box-shadow:0 14px 26px -14px rgba(0,0,0,0.5); transition:transform 160ms ease;
+  }
+  .story-card:hover{ transform:translateY(-4px); }
+  .story-card:active{ transform:translateY(1px); }
+  .story-card:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+  .story-cover{ height:96px; display:flex; align-items:center; justify-content:center; font-size:42px; }
+  .cover-teal{ background:linear-gradient(135deg, var(--teal), var(--teal-dark)); }
+  .cover-marigold{ background:linear-gradient(135deg, var(--marigold), var(--dusk)); }
+  .cover-coral{ background:linear-gradient(135deg, var(--coral), var(--coral-dark)); }
+  .story-body{ padding:13px 15px 16px; }
+  .story-theme{ font-size:10.5px; font-weight:800; letter-spacing:0.4px; color:var(--coral-dark); text-transform:uppercase; margin-bottom:4px; }
+  .story-body h3{ margin:0 0 6px; font-family:'Lora',serif; font-size:16px; }
+  .story-body p{ margin:0 0 8px; font-size:12.5px; color:var(--ink-soft); font-weight:600; line-height:1.4; }
+  .story-cta{ font-size:11.5px; font-weight:800; color:var(--teal-dark); }
+
+  /* ---------- reader ---------- */
+  .reader-page{
+    max-width:600px; width:100%; background:var(--cream); color:var(--ink); border-radius:22px; padding:26px 26px 24px;
+    box-shadow:0 20px 40px -18px rgba(0,0,0,0.55); position:relative; margin-top:10px;
+  }
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.14); color:var(--cream); text-decoration:none;
+    font-weight:700; font-size:13.5px; padding:9px 15px; border-radius:12px; border:none; cursor:pointer; margin-bottom:14px;
+  }
+  .page-icon-panel{ height:100px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:46px; margin-bottom:16px; }
+  .reader-title{ font-family:'Lora',serif; font-weight:700; font-size:20px; margin:0 0 4px; }
+  .reader-page-count{ font-size:12px; font-weight:700; color:var(--ink-soft); margin-bottom:14px; }
+  .reader-text{ font-family:'Lora',serif; font-size:17px; line-height:1.7; margin:0 0 20px; }
+  .moral-box{ background:#FFF6E4; border:2px dashed var(--marigold); border-radius:14px; padding:14px 16px; margin-bottom:14px; }
+  .moral-box b{ color:var(--coral-dark); }
+  .reflect-box{ background:#EAF7F1; border-radius:14px; padding:14px 16px; margin-bottom:18px; font-style:italic; }
+
+  .reader-controls{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .audio-btn{
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:13.5px; color:#fff; background:var(--coral);
+    border:none; border-radius:12px; padding:10px 16px; cursor:pointer; box-shadow:0 4px 0 var(--coral-dark);
+  }
+  .audio-btn:active{ transform:translateY(3px); box-shadow:none; }
+  .nav-btns{ display:flex; gap:8px; }
+  .nav-btn{
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:13.5px; color:#fff; background:var(--teal);
+    border:none; border-radius:12px; padding:10px 18px; cursor:pointer; box-shadow:0 4px 0 var(--teal-dark);
+  }
+  .nav-btn:active{ transform:translateY(3px); box-shadow:none; }
+  .nav-btn[disabled]{ opacity:0.35; cursor:not-allowed; box-shadow:none; }
+  .nav-btn.secondary{ background:#EDE1CE; color:var(--ink); box-shadow:0 4px 0 #cfc2a9; }
+
+  .final-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
+
+  /* ---------- adventure (embedded) ---------- */
+  .title-wrap{ text-align:center; max-width:520px; margin-top:10px; }
+  .title-wrap .eyebrow{ font-size:34px; margin-bottom:6px; }
+  .title-wrap h1{ font-family:'Lora',serif; font-weight:700; font-size:32px; margin:0 0 10px; color:var(--cream); line-height:1.2; }
+  .title-wrap p{ color:#E7D9F0; font-size:15px; font-weight:600; margin:0 0 22px; line-height:1.5; }
+  .cta-btn{
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:15.5px; color:var(--ink); background:var(--gold);
+    border:none; border-radius:16px; padding:14px 28px; cursor:pointer; box-shadow:0 5px 0 #C99416;
+  }
+  .cta-btn:active{ transform:translateY(3px); box-shadow:none; }
+  .ghost-btn{
+    font-family:'Nunito',sans-serif; font-weight:700; font-size:14px; color:var(--cream); background:rgba(255,255,255,0.12);
+    border:2px solid rgba(255,255,255,0.35); border-radius:16px; padding:12px 24px; cursor:pointer;
+  }
+  .ghost-btn:active{ transform:translateY(2px); }
+
+  .family-grid{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px; max-width:760px; margin:8px auto 20px; width:100%; }
+  @media (max-width:760px){ .family-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); max-width:460px; } }
+  .fam-card{ background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:14px 8px 12px; text-align:center; }
+  .avatar{ width:60px; height:60px; border-radius:50%; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; overflow:hidden;
+    background:rgba(255,255,255,0.1); border:3px solid; }
+  .avatar svg{ width:56px; height:56px; display:block; }
+  .fam-card h4{ font-family:'Lora',serif; font-size:12.5px; margin:0 0 2px; color:var(--cream); font-weight:600; }
+  .fam-card .role{ font-size:10px; font-weight:800; letter-spacing:0.4px; color:var(--marigold); margin-bottom:4px; }
+  .fam-card .trait{ font-size:10.5px; color:#DCCBE8; line-height:1.35; font-weight:600; }
+
+  .story-page-adv{
+    max-width:600px; width:100%; background:var(--cream); color:var(--ink); border-radius:22px; padding:26px 26px 28px;
+    box-shadow:0 20px 40px -18px rgba(0,0,0,0.55); position:relative; margin-top:6px;
+  }
+  .chapter-tag{
+    position:absolute; top:-14px; left:24px; background:var(--coral); color:#fff; font-family:'Nunito',sans-serif;
+    font-weight:800; font-size:12px; padding:7px 14px; border-radius:10px; box-shadow:0 4px 0 var(--coral-dark);
+  }
+  .chapter-title{ font-family:'Lora',serif; font-weight:700; font-size:22px; margin:14px 0 12px; color:var(--ink); }
+  .story-text{ font-family:'Lora',serif; font-size:16.5px; line-height:1.65; color:var(--ink); margin:0 0 20px; }
+  .story-text b{ color:var(--coral-dark); }
+  .choice-list{ display:flex; flex-direction:column; gap:10px; }
+  .choice-btn{
+    text-align:left; border:2px solid #E7DCCB; background:#fff; border-radius:14px; padding:13px 16px; cursor:pointer;
+    font-family:'Nunito',sans-serif; font-weight:700; font-size:14.5px; color:var(--ink); transition:border-color 150ms ease, transform 120ms ease;
+  }
+  .choice-btn:hover{ border-color:var(--teal); }
+  .choice-btn:focus-visible{ outline:3px solid var(--ink); outline-offset:2px; }
+  .choice-btn.is-correct{ border-color:var(--teal-dark); background:#E7F8F1; animation:pop 500ms ease; }
+  .choice-btn.is-wrong{ animation:shake 400ms ease; }
+  @keyframes pop{ 0%{transform:scale(1);} 40%{transform:scale(1.03);} 100%{transform:scale(1);} }
+  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+  .riddle-feedback{ font-family:'Nunito',sans-serif; font-weight:700; font-size:13.5px; color:var(--teal-dark); margin:-6px 0 14px; min-height:18px; }
+  .continue-row{ display:flex; justify-content:flex-end; margin-top:6px; }
+  .continue-btn{
+    font-family:'Nunito',sans-serif; font-weight:800; font-size:14.5px; color:#fff; background:var(--teal);
+    border:none; border-radius:14px; padding:12px 22px; cursor:pointer; box-shadow:0 4px 0 var(--teal-dark);
+  }
+  .continue-btn:active{ transform:translateY(3px); box-shadow:none; }
+  .progress-dots{ display:flex; gap:6px; justify-content:center; margin:18px 0 4px; }
+  .pdot{ width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,0.3); }
+  .pdot.on{ background:var(--gold); }
+  .ending-badge{ font-size:52px; text-align:center; margin-bottom:6px; }
+  .ending-title{ font-family:'Lora',serif; font-weight:700; font-size:24px; text-align:center; margin:0 0 4px; color:var(--coral-dark); }
+  .ending-sub{ text-align:center; font-weight:700; font-size:13px; color:var(--ink-soft); margin-bottom:16px; }
+  .ending-actions{ display:flex; gap:10px; justify-content:center; margin-top:18px; flex-wrap:wrap; }
+  .discovered{ text-align:center; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-top:14px; }
+
+  .site-footer{ text-align:center; font-size:12px; font-weight:700; color:rgba(255,255,255,0.55); padding:20px 10px 30px; }
+</style>
+</head>
+<body>
+
+<div class="skyline" id="skyline"></div>
+
+<div id="app">
+  <div class="site-nav">
+    <a href="index.html" class="site-nav-brand">🏡 Igidigbo Kids World</a>
+    <div class="site-nav-links">
+      <a href="index.html">Home</a>
+      <a href="games.html">Games</a>
+      <a href="stories.html" class="active">Stories</a>
+      <button class="icon-btn" id="mute-btn" aria-label="Mute sound" title="Sound">🔊</button>
+    </div>
+  </div>
+
+  <main id="library-screen">
+    <div class="hero">
+      <h1>📖 The Storybook</h1>
+      <p>36 stories about the Charles family — plus an interactive treasure hunt adventure. Stories about telling the truth, trying again, being kind, knowing your own worth, and a Bible story too. Every story can be read aloud.</p>
+    </div>
+    <div class="search-row">
+      <input type="text" id="story-search" class="search-input" placeholder="Search stories by title or theme…" />
+    </div>
+    <div class="filter-row" id="category-filters"></div>
+    <div class="story-grid" id="story-grid"></div>
+  </main>
+
+  <main id="reader-screen" class="hidden">
+    <button class="back-link" id="reader-back-btn">&larr; Story Library</button>
+    <div class="reader-page" id="reader-page"></div>
+  </main>
+
+  <main id="adv-title-screen" class="hidden">
+    <button class="back-link" id="adv-back-btn">&larr; Story Library</button>
+    <div class="title-wrap">
+      <div class="eyebrow">🗺️</div>
+      <h1>The Treasure Hunt</h1>
+      <p>Join Mr. Charles, Mrs. Jahradien Charles, and their three children, Honest, Holiness and Harry, on a Saturday adventure. The choices you make decide how their story ends.</p>
+      <button class="cta-btn" id="meet-family-btn">Meet the Family</button>
+    </div>
+  </main>
+
+  <main id="adv-family-screen" class="hidden">
+    <div class="title-wrap" style="margin-top:6px;">
+      <h1 style="font-size:24px;">Meet the Family</h1>
+      <p style="margin-bottom:10px;">Every choice in this story is guided by one of their hearts.</p>
+    </div>
+    <div class="family-grid" id="family-grid"></div>
+    <div style="text-align:center;">
+      <button class="cta-btn" id="start-story-btn">Begin the Adventure</button>
+    </div>
+  </main>
+
+  <main id="adv-story-screen" class="hidden">
+    <div class="progress-dots" id="progress-dots"></div>
+    <div class="story-page-adv" id="story-page-adv"></div>
+  </main>
+
+  <div class="site-footer">© 2026 All rights reserved Hontech Technology.</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- skyline ---------- */
+  var skyline = document.getElementById('skyline');
+  for(var i=0;i<26;i++){
+    var b = document.createElement('div');
+    b.className = 'bldg';
+    b.style.width = (20 + Math.random()*34) + 'px';
+    b.style.height = (30 + Math.random()*80) + 'px';
+    skyline.appendChild(b);
+  }
+
+  /* ---------- shared audio: tones + speech ---------- */
+  var muted = false;
+  var audioCtx = null;
+  function ensureAudio(){
+    if(!audioCtx){ try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx=null; } }
+    if(audioCtx && audioCtx.state==='suspended'){ audioCtx.resume(); }
+  }
+  document.addEventListener('click', ensureAudio, { once:true });
+
+  function playTone(kind){
+    if(muted || !audioCtx) return;
+    try{
+      var now = audioCtx.currentTime;
+      if(kind==='correct' || kind==='choice'){
+        var notes = kind==='correct' ? [523.25,659.25,783.99,1046.5] : [493.88,659.25];
+        notes.forEach(function(f,idx){
+          var osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+          osc.type='triangle'; osc.frequency.value=f;
+          var start=now+idx*0.07;
+          gain.gain.setValueAtTime(0,start);
+          gain.gain.linearRampToValueAtTime(0.16,start+0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001,start+0.22);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(start); osc.stop(start+0.24);
+        });
+      } else {
+        [0,0.28].forEach(function(offset){
+          var osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+          osc.type='sawtooth';
+          var start=now+offset;
+          osc.frequency.setValueAtTime(300,start);
+          osc.frequency.exponentialRampToValueAtTime(140,start+0.26);
+          gain.gain.setValueAtTime(0.001,start);
+          gain.gain.linearRampToValueAtTime(0.13,start+0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001,start+0.28);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(start); osc.stop(start+0.3);
+        });
+      }
+    }catch(e){}
+  }
+
+  var speechSupported = 'speechSynthesis' in window;
+  var speechState = { speaking:false, paused:false };
+  function stopSpeech(){
+    if(speechSupported){ window.speechSynthesis.cancel(); }
+    speechState.speaking = false; speechState.paused = false;
+  }
+  function updateAudioUI(btnEl, dotEl){
+    if(!btnEl) return;
+    if(!speechState.speaking){ btnEl.textContent = '▶️ Read Aloud'; }
+    else if(speechState.paused){ btnEl.textContent = '▶️ Resume'; }
+    else { btnEl.textContent = '⏸ Pause'; }
+    if(dotEl) dotEl.classList.toggle('on', speechState.speaking && !speechState.paused);
+  }
+  function toggleReadAloud(text, btnEl, dotEl){
+    if(!speechSupported){ return; }
+    if(muted){ return; }
+    if(!speechState.speaking){
+      var utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.92; utter.pitch = 1.05;
+      var voices = window.speechSynthesis.getVoices();
+      var enVoice = voices.find(function(v){ return /en/i.test(v.lang); });
+      if(enVoice) utter.voice = enVoice;
+      utter.onend = function(){ speechState.speaking=false; speechState.paused=false; updateAudioUI(btnEl, dotEl); };
+      utter.onerror = function(){ speechState.speaking=false; speechState.paused=false; updateAudioUI(btnEl, dotEl); };
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utter);
+      speechState.speaking = true; speechState.paused = false;
+    } else if(!speechState.paused){
+      try{ window.speechSynthesis.pause(); }catch(e){}
+      speechState.paused = true;
+    } else {
+      try{ window.speechSynthesis.resume(); }catch(e){}
+      speechState.paused = false;
+    }
+    updateAudioUI(btnEl, dotEl);
+  }
+
+  document.getElementById('mute-btn').addEventListener('click', function(){
+    muted = !muted;
+    this.textContent = muted ? '🔇' : '🔊';
+    this.setAttribute('aria-label', muted ? 'Unmute sound' : 'Mute sound');
+    if(muted) stopSpeech();
+  });
+
+  function confettiBurst(container, count){
+    var colors = ['#F4C542','#E85D4E','#1F9E7A','#F4A93B','#FBF3E7'];
+    for(var i=0;i<(count||26);i++){
+      var piece = document.createElement('div');
+      piece.style.position='absolute'; piece.style.top='0'; piece.style.width='9px'; piece.style.height='14px';
+      piece.style.borderRadius='2px'; piece.style.opacity='0.95';
+      piece.style.left = (2+Math.random()*96)+'%';
+      piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+      piece.style.animation = 'confetti-fall '+(1.1+Math.random()*0.7)+'s ease-in forwards';
+      piece.style.animationDelay = (Math.random()*0.3)+'s';
+      container.appendChild(piece);
+      (function(p){ setTimeout(function(){ p.remove(); }, 2000); })(piece);
+    }
+  }
+  var styleTag = document.createElement('style');
+  styleTag.textContent = '@keyframes confetti-fall{from{transform:translateY(-20px) rotate(0deg);opacity:1;}to{transform:translateY(320px) rotate(400deg);opacity:0;}}';
+  document.head.appendChild(styleTag);
+
+  /* ================= CATEGORIES & STORY DATA ================= */
+  var CATEGORIES = [
+    { id:"all", label:"All Stories", icon:"📚" },
+    { id:"values", label:"Character & Values", icon:"🌟" },
+    { id:"friendship", label:"Friendship & Family", icon:"🤝" },
+    { id:"growth", label:"Learning & Growth", icon:"🧠" },
+    { id:"nature", label:"Nature & Animals", icon:"🌱" },
+    { id:"money", label:"Money & Responsibility", icon:"💰" },
+    { id:"feelings", label:"Feelings & Kindness", icon:"❤️" },
+    { id:"courage", label:"Courage & Perseverance", icon:"🏆" },
+    { id:"school", label:"Bolken Montessori School", icon:"🏫" },
+    { id:"family", label:"Charles Family Adventures", icon:"👨‍👩‍👧‍👦" },
+    { id:"bible", label:"Bible Stories", icon:"🙏" }
+  ];
+
+  var STORY_DATA = {
+    vase: {
+      title:"Honest and the Broken Vase", subtitle:"Self-Confidence", category:"values", icon:"🏺", cover:"cover-teal", blurb:"Honest breaks Mother's favourite vase — and learns that telling the truth takes real courage.",
+      pages:[
+      "It's a quiet Saturday afternoon, and Honest is dusting the shelf in the living room while Mother cooks in the kitchen. On the top shelf sits Mother's favourite blue vase, the one from her own mother's house.",
+      "Honest reaches up on her tiptoes to dust behind it — and knocks it clean off the shelf. It hits the floor and shatters into a dozen pieces before she can even gasp.",
+      "Her heart pounds. For one whole second, she thinks about sweeping the pieces away quietly and blaming Whiskers, the cat dozing nearby. No one would ever know.",
+      "Then she remembers something Father says often: \"The truth might be hard for a moment, but a lie is heavy forever.\" Honest takes a deep breath.",
+      "She gathers the pieces carefully, walks into the kitchen, and says clearly, \"Mummy, I broke your vase. I'm sorry — it was an accident, and I should have been more careful.\"",
+      "Mother is quiet for a moment. Then she kneels down and hugs Honest tightly. \"The vase can be replaced,\" she says softly, \"but your honesty cannot. I'm proud of you.\" Honest feels something warm settle in her chest — not fear anymore, but pride."
+    ],
+      moral:"Telling the truth, even when it's scary, is one of the bravest things you can do — and it builds a kind of confidence that hiding never can.",
+      reflection:"Has there been a time you told the truth even though it felt hard? How did it feel afterward?"
+    },
+    bicycle: {
+      title:"Harry's Wobbly Bicycle", subtitle:"Dealing with Difficulties", category:"courage", icon:"🚲", cover:"cover-marigold", blurb:"Harry keeps falling off his new bicycle. Should he give up, or try just once more?",
+      pages:[
+      "For his birthday, Harry receives a shiny red bicycle with a silver bell that goes \"ting-ting!\" He can hardly wait to ride it around the compound.",
+      "His first try doesn't go so well. The bicycle wobbles left, then right, then tips over completely, leaving a bright red scrape on his knee. Harry wants to push the bicycle straight back into the shed and forget about it.",
+      "Holiness sits down on the grass beside him. \"Remember when I couldn't tie my shoelaces?\" she says. \"I fell — I mean, I messed it up — about a hundred times too.\" Father adds gently, \"Falling isn't failing, Harry. Stopping is.\"",
+      "Harry climbs back on. He wobbles again, but a little less this time. By evening, he manages three whole seconds without falling. Then five. Then ten.",
+      "A few days later, Harry pedals confidently around the entire compound, laughing with the wind in his face. He isn't thinking about falling anymore — he's already imagining how far he'll ride tomorrow.",
+      "That evening at dinner, Harry proudly shows off the (mostly healed) scrape on his knee like a badge of honour, and everyone claps."
+    ],
+      moral:"Every new skill feels wobbly before it feels steady. The falling down isn't a sign to stop — it's simply part of how learning works.",
+      reflection:"What's something that felt hard at first but got easier the more you practised?"
+    },
+    newgirl: {
+      title:"Holiness and the New Girl", subtitle:"Loving One Another", category:"school", icon:"🧡", cover:"cover-coral", blurb:"A new girl at Bolken Montessori School sits alone at break time — until Holiness notices.",
+      pages:[
+      "A new girl named Amara joins Holiness's class at Bolken Montessori School. At break time, she sits alone under the mango tree, quietly peeling an orange, looking a little lost.",
+      "A few classmates whisper about her accent and her lunchbox, the way children sometimes do around anything unfamiliar. Holiness feels a small tug in her chest — she remembers exactly how nervous she felt on her own first day.",
+      "Without making a big fuss about it, Holiness walks over, sits down beside Amara, and asks, \"Can I share your orange if you share my biscuits?\" Amara looks up, surprised — and smiles for the first time all day.",
+      "By the end of break, the two of them are laughing about a joke Amara's grandmother used to tell back home. Holiness learns that Amara's family moved from a city far away, and that she misses her old friends very much.",
+      "At home that evening, Holiness tells her family all about her new friend. Father listens and says, \"The world always has room for one more kind seat at the table.\" Mother smiles and adds a spot for Amara at their next family visit.",
+      "The next morning, Amara doesn't sit alone under the mango tree. She sits with Holiness — and it becomes their spot, every single day after that."
+    ],
+      moral:"A small act of kindness — sharing a seat, a snack, or a smile — can turn someone's hardest day into their best one.",
+      reflection:"Have you ever welcomed someone new? Or been the new person yourself? What helped?"
+    },
+    mirror: {
+      title:"The Mirror That Only Told the Truth", subtitle:"Self-Worth", category:"values", icon:"🪞", cover:"cover-teal", blurb:"After coming last in a race, Harry visits Grandma's old mirror — and sees something surprising.",
+      pages:[
+      "At Grandma's house, there's an old, spotted mirror hanging in the hallway. Grandma always says, \"That mirror only shows you what's really true — never what you're afraid of.\"",
+      "The twins are visiting for the weekend. Harry has been quiet since Saturday's school running race, where he came last, and he mutters, \"I'm just not good at anything.\"",
+      "Grandma gently leads him to the old mirror. \"Look properly,\" she says. Harry sees a boy who stopped mid-race to help his little cousin up when she tripped. A boy who shares his snacks without being asked. A boy who makes everyone laugh at dinner.",
+      "Harry blinks. He hadn't thought of those things as being worth much. \"But I still came last,\" he says quietly. Grandma smiles. \"Coming last in one race, and being worth something — those are two completely different questions.\"",
+      "That evening at dinner, Harry sits a little taller. Not because he suddenly became the fastest runner in school, but because he remembers what actually made him valuable all along.",
+      "Before bed, Harry glances at the old mirror one more time on his way past — and this time, he doesn't look away."
+    ],
+      moral:"Your worth was never measured by being first, fastest, or best. It was there all along, in who you are and how you treat others.",
+      reflection:"What is something kind or good about you that has nothing to do with winning?"
+    },
+    rain: {
+      title:"Mr. Charles and the Rainy Match", subtitle:"Handling Disappointment", category:"family", icon:"🌧️", cover:"cover-marigold", blurb:"The big match is rained out. Father shows the twins what to do with a \"ruined\" Saturday.",
+      pages:[
+      "The family plans all week for the big Saturday football match at the community field. The twins' team is playing, and everyone — even Honest, who isn't much for football — is excited.",
+      "Saturday morning brings dark clouds instead, and by kickoff time, the rain is pouring so hard the match gets cancelled. Harry is furious, kicking at puddles on the veranda. Holiness is close to tears.",
+      "Father doesn't tell them to stop feeling upset. He simply sits with them, watching the rain fall, and says, \"It's alright to feel disappointed. Feelings aren't the problem — what we do with them is.\"",
+      "Then he asks something unexpected: \"The field will still be there next week. But right now, we have a whole rainy afternoon nobody planned for. What should we do with it?\" Slowly, ideas start coming — a board game, a blanket fort, baking with Mother.",
+      "By evening, the \"ruined\" Saturday has turned into one of their favourite afternoons — laughter, flour dusted across the kitchen counter, and a fort built from every couch cushion in the house.",
+      "As they finally settle down to sleep, nobody mentions the cancelled match at all. It's already been forgotten, tucked under a much better memory."
+    ],
+      moral:"Disappointment is allowed — but it doesn't have to be the end of the story. There's often a good afternoon hiding inside a rained-out one.",
+      reflection:"Tell me about a time something didn't go as planned. What did you do instead?"
+    },
+    littleseed: {
+      title:"The Little Seed", subtitle:"Patience and growth", category:"nature", icon:"🌱", cover:"cover-coral", blurb:"Holiness plants a seed and learns that some of the best things in life can't be rushed.",
+      pages:[
+      "At school, Holiness's teacher at Bolken Montessori School hands every child a small clay pot, a scoop of soil, and one dry brown seed. \"Plant it, water it, and watch,\" the teacher says. Holiness carries hers home like it's made of glass.",
+      "The next morning, Holiness runs straight to the windowsill. Nothing. Just soil. She waters it again, just to be sure, and checks again after lunch. Still nothing. \"Maybe it's broken,\" she tells Harry with a sigh.",
+      "Mrs. Jahradien crouches beside her. \"Some things grow where you can see them,\" she says, \"and some things grow where you can't — at first.\" She reminds Holiness that even Holiness herself grew quietly for nine whole months before anyone ever saw her.",
+      "Holiness decides to stop checking every hour. She waters it once a day, the way the teacher said, and goes back to her normal days — school, drawing, chasing Harry around the garden. On the seventh day, she almost forgets to look.",
+      "When she finally does look, a tiny green curl has pushed up through the soil, reaching toward the window like it's waving hello. Holiness gasps so loudly that Harry comes running, certain something is wrong — until he sees her enormous smile instead."
+    ],
+      moral:"Some of the best things — a plant, a friendship, a new skill — can't be rushed. They grow quietly, a little at a time, even when we can't see it happening.",
+      reflection:"What is something in your life that you're still waiting patiently for?"
+    },
+    twobestfriends: {
+      title:"The Two Best Friends", subtitle:"Friendship", category:"friendship", icon:"🤝", cover:"cover-teal", blurb:"Harry and Holiness disagree over which game to play — and discover what makes a friendship stronger than any game.",
+      pages:[
+      "Harry wants to play football in the yard. Holiness wants to play \"shop\", lining up bottle caps as coins on the veranda. \"Football is better!\" Harry insists. \"Shop is better!\" Holiness insists right back, arms crossed exactly like his.",
+      "Neither one budges. Harry kicks his ball against the wall, alone. Holiness arranges her bottle caps, alone. Ten whole minutes pass, and neither game feels as fun without someone to play against — or with.",
+      "Honest watches from the doorway, trying not to smile. \"You two are twins,\" she says, \"which means you were born to figure this out together, not apart.\" She doesn't tell them what to do — she just waits.",
+      "Harry looks at his lonely football. Holiness looks at her lonely bottle caps. \"What if,\" Harry says slowly, \"the shop sells footballs?\" Holiness's face lights up. \"And what if the football match has a halftime snack stand?\"",
+      "By evening, they've built the strangest, best game either of them has ever played — half football pitch, half marketplace, entirely their own invention. Mrs. Jahradien watches from the kitchen window and doesn't ask them to explain the rules; she just enjoys the laughter."
+    ],
+      moral:"Friendship doesn't mean always wanting the same thing — it means being willing to find a way to enjoy things together anyway.",
+      reflection:"Tell about a time you and a friend disagreed, and how you found a way through it."
+    },
+    honestboy: {
+      title:"The Honest Little Boy", subtitle:"Honesty", category:"values", icon:"⚽", cover:"cover-marigold", blurb:"Harry breaks a window with his football — and learns that telling the truth is a kind of bravery all its own.",
+      pages:[
+      "Harry is practising his football shots against the garden wall when one wild kick sails clean over the hedge — and straight through Mr. Adeyemi's kitchen window next door. The crash echoes down the whole street.",
+      "Harry freezes. He could hide behind the hedge until Mr. Adeyemi forgets whose ball it is. He could say it was \"probably some other boy.\" His heart is pounding so loud he can barely think straight.",
+      "Instead, Harry picks up his ball, walks around to Mr. Adeyemi's gate, and knocks — even though his legs feel like jelly. \"Good afternoon, sir. I broke your window with my football. I'm very sorry.\"",
+      "Mr. Adeyemi looks surprised, then almost smiles. \"Most boys would have run,\" he says. Harry offers to do chores to help pay for the glass. That evening, Honest ruffles his hair and grins. \"That was very... Honest of you, Harry,\" she teases, using her own name as the joke. Even Harry laughs.",
+      "Mr. Charles doesn't punish Harry for the broken window at all — only praises him for walking straight to the door instead of hiding behind the hedge. \"A mistake is one problem,\" he says. \"A hidden mistake is two.\""
+    ],
+      moral:"Owning up to a mistake, even a scary one, is one of the bravest and most respected things you can do.",
+      reflection:"Have you ever had to tell someone something difficult? What happened?"
+    },
+    afraidtotry: {
+      title:"The Girl Who Was Afraid to Try", subtitle:"Courage", category:"courage", icon:"🏊", cover:"cover-coral", blurb:"Holiness won't go near the swimming pool at Bolken Montessori School — until she finds out what courage actually feels like.",
+      pages:[
+      "Every Friday, Bolken Montessori School has swimming lessons at the little blue pool behind the school hall. Every Friday, Holiness finds a reason to sit on the bench instead — her tummy hurts, her goggles are missing, she's \"just not thirsty for the pool today.\"",
+      "The truth is simpler and much harder to say out loud: the water scares her. What if she sinks? What if everyone watches her sink?",
+      "Harry, who cannonballs into anything wet without a second thought, doesn't understand at first. But when Holiness finally whispers the real reason at dinner, Mr. Charles sets down his fork. \"Being afraid and being brave aren't opposites,\" he says. \"Brave is doing it while you're afraid.\"",
+      "The next Friday, Holiness doesn't jump in. She sits on the pool step, feet in the water, hands gripping the edge, heart hammering — and stays there the whole lesson. It isn't swimming. But it's a start.",
+      "Week by week, the step becomes the shallow end, and the shallow end slowly becomes three whole strokes without touching the bottom. She never becomes the fastest swimmer in her class. But by the time the term ends, Holiness is the girl who no longer needs an excuse on Fridays."
+    ],
+      moral:"Courage isn't the absence of fear — it's doing the hard thing anyway, one small step at a time.",
+      reflection:"What's something that scares you a little? What would one small step toward it look like?"
+    },
+    helpfulbrother: {
+      title:"The Helpful Brother", subtitle:"Family and responsibility", category:"family", icon:"🎒", cover:"cover-teal", blurb:"When Holiness falls behind on a big school project, Harry discovers that helping someone isn't the same as doing it for them.",
+      pages:[
+      "Holiness's Bolken Montessori class is building a model village out of cardboard, and hers is due Monday. By Saturday evening, she has one lopsided cardboard house and a small mountain of frustration. \"I'm never going to finish,\" she groans, dropping her scissors.",
+      "Harry, who has already finished his own homework (a rare miracle), wanders in to see what the fuss is. He picks up a piece of cardboard and starts cutting a roof — a perfect one, far better than Holiness's.",
+      "\"Just let me do the rest,\" he offers, already reaching for the glue. Holiness hesitates. It would be so much faster. But it wouldn't really be her village anymore, would it?",
+      "\"Show me how you did that roof instead,\" she says. So Harry does — holding the ruler steady, showing her the fold, letting her hands do the actual cutting even when it wobbles.",
+      "By bedtime, the cardboard village stands finished on the dining table — a little crooked in places, entirely Holiness's own work, with Harry's fingerprints only in the helping. Mrs. Jahradien admires it and asks who built it. \"I did,\" Holiness says proudly. \"Harry just showed me how.\""
+    ],
+      moral:"Real help teaches someone to do something themselves — it doesn't just do it for them.",
+      reflection:"What's the difference between helping someone and doing something for them?"
+    },
+    saysorry: {
+      title:"The Girl Who Learned to Say Sorry", subtitle:"Apologizing and forgiveness", category:"feelings", icon:"🧸", cover:"cover-marigold", blurb:"Holiness snaps at Harry over a broken toy — and learns that \"sorry\" is only the beginning of making things right.",
+      pages:[
+      "Holiness's favourite toy, a small plastic giraffe with a bent neck from years of love, goes missing one afternoon. She finds it under the sofa — with one leg snapped clean off. \"HARRY!\" she shouts, before she's even sure it was him.",
+      "Harry, who genuinely doesn't remember touching the giraffe, says so. Holiness doesn't believe him. She says several things she doesn't quite mean, including that he \"breaks everything\" and \"never says sorry for anything\" — which isn't even true.",
+      "Later, Honest finds the giraffe's missing leg — under the cat's favourite cushion, gnawed at the edges. Not Harry after all. Holiness's stomach drops.",
+      "Saying sorry turns out to be harder than she expects. It isn't just the word — it's walking up to Harry, who's still a little hurt, and meaning it. \"I was wrong. I said things I shouldn't have. I'm sorry, Harry.\"",
+      "Harry, who has three younger-sibling grudges and zero older ones, shrugs it off fast — twins are like that. \"It's fine,\" he says, already distracted by the broken giraffe leg. \"Can we fix her with tape?\" By dinner, the giraffe has a very lumpy, very loved, taped-up leg — and so, in a smaller way, does their afternoon."
+    ],
+      moral:"A real apology means more than saying the word \"sorry\" — it means owning what you did and trying to make it right.",
+      reflection:"Has there been a time you needed to apologise for something you said in anger?"
+    },
+    sharedlunch: {
+      title:"The Boy Who Shared His Lunch", subtitle:"Kindness", category:"feelings", icon:"🍱", cover:"cover-coral", blurb:"At Bolken Montessori School, Harry notices a classmate with an empty lunchbox — and quietly decides what to do about it.",
+      pages:[
+      "At Bolken Montessori School, lunch break means everyone spreads out under the mango tree with their lunchboxes. Harry notices that Tunde, who sits two desks away, has been opening an empty lunchbox and pretending to eat from it for three days in a row.",
+      "Harry doesn't say anything to the other children. He just walks over on the fourth day, sits down next to Tunde, and splits his jollof rice and plantain clean in half without making a fuss about it. \"My mum always packs too much anyway,\" he says, which isn't quite true.",
+      "Tunde hesitates, embarrassed, but Harry just keeps talking about football like it's the most normal thing in the world, and eventually Tunde eats. It becomes a quiet, unspoken routine — half for Harry, half for Tunde, every single day.",
+      "Weeks later, Mrs. Jahradien notices Harry's lunchbox coming home suspiciously empty and asks about it. Harry explains, a little embarrassed himself now. Instead of scolding him for the extra spending, she starts packing just a little more — \"in case your friend is hungry,\" she says with a wink.",
+      "Harry never tells anyone at school what he's doing, and Tunde never has to ask. Some kindnesses are loudest when nobody's talking about them at all."
+    ],
+      moral:"You don't need permission or an announcement to be kind — sometimes the quietest kindness means the most.",
+      reflection:"Have you ever shared something with someone who needed it? How did it feel?"
+    },
+    cleverant: {
+      title:"The Clever Ant and the Big Rain", subtitle:"Preparation", category:"nature", icon:"🐜", cover:"cover-teal", blurb:"On a rainy evening, Mrs. Jahradien tells the children a bedtime story about a clever ant — and a very unprepared grasshopper.",
+      pages:[
+      "One rainy evening, with the power out and candlelight flickering across the living room, the three children beg Mrs. Jahradien for a story. She settles into the armchair, and begins: \"Once, in a sunny meadow, there lived a small ant named Ada and a grasshopper named Gbenga.\"",
+      "\"All summer long, Ada carried grains of food to her tunnel, one by one, while the sun blazed overhead. Gbenga laughed at her from the shade. 'Why work so hard? Come sing with me instead!' But Ada just kept carrying.\"",
+      "\"When the rains finally came — heavy, grey, endless rains — Gbenga's meadow flooded, and he had nothing stored away at all. He knocked on Ada's tunnel door, cold and hungry.\"",
+      "\"And what did Ada do?\" Harry asks, wide-eyed, leaning forward. \"She let him in,\" Mrs. Jahradien says, \"and shared what she'd stored — but she also taught him how to gather his own, so that next rainy season, he wouldn't need to knock on anyone's door.\"",
+      "The lights flicker back on just as the story ends. Holiness looks thoughtfully at her half-finished homework on the table. \"I should probably finish that now,\" she says, \"instead of tomorrow morning.\" Mrs. Jahradien just smiles into her tea."
+    ],
+      moral:"A little preparation today saves a lot of worry tomorrow — and there's always room to help someone else catch up.",
+      reflection:"What's something you could prepare for ahead of time, instead of waiting until the last minute?"
+    },
+    wantedeverything: {
+      title:"The Boy Who Wanted Everything", subtitle:"Gratitude", category:"values", icon:"🎁", cover:"cover-marigold", blurb:"At the market, Harry wants every single toy he sees — until Mr. Charles teaches him a different way to look at what he already has.",
+      pages:[
+      "At the Saturday market, Harry's eyes catch on a toy car. Then a kite. Then a spinning top with painted stripes. \"I want that. And that. And that one too!\" he says, tugging Mr. Charles's sleeve at every stall.",
+      "Mr. Charles doesn't scold him. Instead, he crouches down. \"Let's play a game,\" he says. \"For every new thing you want, tell me one thing you already have that you love.\"",
+      "Harry thinks. \"I have... my red bicycle.\" \"Good,\" says Father. \"Now the kite?\" \"I have my football,\" Harry admits, a little less certain now. By the fifth toy, Harry has run out of new things he desperately wants — and found himself listing an awful lot of things he already loves.",
+      "On the walk home, empty-handed but not really empty at all, Harry counts on his fingers: his bicycle, his football, Holiness to race against, Honest's bedtime stories, Sunday morning pancakes. The list keeps going long after the market stalls are behind them.",
+      "That night, as Harry falls asleep still counting things he's grateful for, Mr. Charles tells Mrs. Jahradien about their little game. \"He didn't get a single toy today,\" he laughs quietly, \"and somehow he still went to bed the happiest I've seen him in weeks.\""
+    ],
+      moral:"Wanting more isn't wrong, but noticing what you already have can turn an empty-handed day into a full-hearted one.",
+      reflection:"Name three things you already have that you're grateful for."
+    },
+    littlechef: {
+      title:"The Little Chef", subtitle:"Healthy eating", category:"family", icon:"🥗", cover:"cover-coral", blurb:"Honest decides to cook dinner all by herself — and learns that a good meal takes more than just enthusiasm.",
+      pages:[
+      "Honest announces at breakfast that she will be cooking dinner tonight, entirely by herself, no help needed, thank you very much. Mrs. Jahradien raises an eyebrow but hands over the kitchen — with one condition: it has to include a vegetable.",
+      "By five o'clock, Honest has a plan: jollof rice, extra spicy, with... she stares at the fridge... a single tomato balanced dramatically on top as the \"vegetable.\" Harry, wandering through, points out that tomato is technically a fruit, which does not help her case.",
+      "Mrs. Jahradien, watching from the doorway, doesn't take over. She just asks questions. \"What colours do you see in the fridge?\" Honest looks again — green beans, orange carrots, red peppers. \"What if the rice had more than one colour in it?\"",
+      "Honest chops (carefully, with supervision), stirs, and tastes as she goes, adjusting salt and pepper the way she's watched Mother do a hundred times. The kitchen ends up more colourful — and messier — than she planned.",
+      "Dinner turns out to be a bright, slightly-too-spicy vegetable jollof rice that the whole family finishes to the last grain, complimenting the chef between sips of water for the spice. Honest beams. \"Next week,\" she announces, \"dessert too.\" Mr. Charles laughs and says he'll clear his schedule."
+    ],
+      moral:"A little curiosity and a willingness to try goes a long way — even in the kitchen, good things come from paying attention and asking questions.",
+      reflection:"Have you ever tried cooking or helping to make a meal? What did you learn?"
+    },
+    learnedtosave: {
+      title:"The Boy Who Learned to Save", subtitle:"Money and saving", category:"money", icon:"🐖", cover:"cover-teal", blurb:"Harry spends his allowance the moment he gets it — until a wobbly, half-broken toy teaches him the value of waiting.",
+      pages:[
+      "Every Saturday, Harry receives a small allowance, and every Saturday, it is gone by Sunday — spent on sweets, spent on a balloon that pops within the hour, spent on absolutely nothing he remembers by Monday.",
+      "Then he sees it: a remote-control car in the shop window, the kind that does actual wheelies. It costs six whole weeks of allowance. Harry's heart sinks — six weeks feels like six years.",
+      "Mr. Charles hands him an old tin with a slot cut in the lid. \"Every week, before you spend anything, put a little in here first,\" he says. \"Then spend what's left on whatever you like.\" Harry is doubtful, but tries it.",
+      "The first two weeks are agony — Harry watches the sweet shop with real longing. By week four, though, something shifts: shaking the tin and hearing the coins rattle feels almost as fun as spending them. He starts adding a little extra some weeks, just to hear it rattle louder.",
+      "In week six, Harry marches to the shop with his tin, counts out every coin onto the counter, and walks out with the remote-control car held high like a trophy. It does, in fact, do wheelies. Somehow, though, the tin itself — now empty and waiting for the next goal — feels like the real prize."
+    ],
+      moral:"Saving a little at a time turns something that feels impossible into something you can actually reach.",
+      reflection:"Is there something you're saving up for? How do you keep yourself patient while you wait?"
+    },
+    cleanedroom: {
+      title:"The Girl Who Cleaned Her Room", subtitle:"Responsibility", category:"money", icon:"🧹", cover:"cover-marigold", blurb:"Holiness's room becomes so messy she can't find her own school shoes — and learns why tidying up matters more than she thought.",
+      pages:[
+      "Holiness's bedroom floor has become a floor in name only — buried under crayons, half-finished drawings, one shoe (the other missing entirely), and a suspicious number of biscuit wrappers.",
+      "On Monday morning, with the school bus honking outside, Holiness cannot find her second shoe anywhere. She digs through the chaos in a panic while Harry, fully ready, taps his foot by the door. They miss the bus. Mr. Charles has to drive them, grumbling gently about the traffic he now has to sit in.",
+      "That evening, instead of scolding, Mrs. Jahradien sits on the floor with her. \"A tidy room isn't about being perfect,\" she says, \"it's about being able to find what you need when you need it.\" Together, they sort — not throw away, just sort — into piles: keep, put away, and \"does this even work anymore?\"",
+      "It takes over an hour, and Holiness discovers three toys she'd completely forgotten she owned, along with both shoes, safely reunited at last.",
+      "The next morning, getting ready takes ten calm minutes instead of a frantic scramble. Holiness doesn't keep her room spotless every single day after that — she's still a kid — but she never again loses a shoe to the chaos, and the bus never honks for her twice."
+    ],
+      moral:"Taking care of your things and your space isn't about being perfect — it's about making your own life easier, one small habit at a time.",
+      reflection:"What's one small habit that could make your mornings (or your room) a little easier?"
+    },
+    kindtoanimal: {
+      title:"The Boy Who Was Kind to an Animal", subtitle:"Caring for animals", category:"nature", icon:"🐕", cover:"cover-coral", blurb:"Harry finds a thin, shivering stray dog by the school gate — and has to decide what kindness actually costs.",
+      pages:[
+      "On the walk home from Bolken Montessori School, Harry spots a thin brown dog sheltering under a parked car, shivering despite the afternoon heat. Its ribs show clearly beneath matted fur, and it flinches when Harry crouches nearby.",
+      "Holiness wants to keep walking — \"Mum said no more pets,\" she reminds him, remembering the goldfish incident. But Harry can't quite make his feet move past the dog's frightened eyes.",
+      "He doesn't pick it up or try to take it home. He simply breaks off half of his after-school biscuit and sets it down a careful distance away, then steps back and waits. The dog eats slowly, watching him the whole time.",
+      "Harry returns the next day with a little water in an old bottle, and the day after that, a little more food. Slowly, the dog stops flinching, then starts wagging, then — three weeks later — trots up to meet him at the gate every single afternoon.",
+      "Mr. Charles, hearing about the routine, doesn't offer to adopt the dog outright, but he does help Harry find Mrs. Bello down the road, who's been wanting a gentle guard dog for her shop. The dog gets a real home, a real name — Shadow — and a visitor most afternoons, since Mrs. Bello's shop happens to be right on Harry's way home."
+    ],
+      moral:"Kindness to animals doesn't always mean keeping them — sometimes it means patiently helping them find the care they truly need.",
+      reflection:"How can we be kind to animals, even ones that aren't our own pets?"
+    },
+    treeneedfriends: {
+      title:"The Tree That Needed Friends", subtitle:"Protecting nature", category:"nature", icon:"🌳", cover:"cover-teal", blurb:"The old mango tree on their street is the last one left after new houses go up — and Honest decides it shouldn't stand alone.",
+      pages:[
+      "The old mango tree at the end of the street used to have three neighbours — a guava, a paw-paw, and a smaller mango — before new houses were built and the other trees were cleared away. Now it stands alone, its branches a little bare this season.",
+      "\"Trees can get lonely too,\" Grandma tells Honest one afternoon, only half joking. \"A tree on its own has no one to share water with underground, no shade for young saplings to grow safely in.\" Honest can't stop thinking about the lone mango tree after that.",
+      "She brings it up at dinner, half-expecting to be told it's just a tree. Instead, Mr. Charles asks what she thinks should be done. Honest, surprised to be asked, actually has an answer ready: \"What if we asked the neighbours to plant new trees too? Just one each?\"",
+      "It takes a whole Saturday morning of knocking on doors, but by afternoon, five families have agreed — a guava here, a young mango there, an orange tree by the Adeyemis' fence. Honest and her siblings dig the first hole together, Harry getting more mud on his shirt than in the ground.",
+      "It will be years before the little trees are tall enough to matter much. But that evening, looking down the street at five small hopeful saplings standing near the old mango tree, Honest feels like she's already seen the shade they'll make one day."
+    ],
+      moral:"Looking after nature often starts with one small, patient action — and it grows bigger, and matters more, than you'd expect.",
+      reflection:"What is one small thing you could do to help nature where you live?"
+    },
+    learnedlisten: {
+      title:"The Girl Who Learned to Listen", subtitle:"Communication", category:"growth", icon:"👂", cover:"cover-marigold", blurb:"Honest is so busy giving her siblings advice that she forgets to actually hear what they're trying to tell her.",
+      pages:[
+      "As the eldest, Honest has opinions about everything — how Harry should organise his school bag, how Holiness should braid her hair, which route is fastest to school. She hands out advice the way some people hand out sweets: generously, and often unasked.",
+      "One afternoon, Holiness tries to tell her something is bothering her at school. \"You should just ignore them,\" Honest interrupts before Holiness even finishes the sentence, already moving on to homework. Holiness goes quiet and doesn't bring it up again.",
+      "It's Mrs. Jahradien who notices Holiness has been unusually quiet at dinner for days. When she gently asks what's wrong, the whole story comes out — some older girls at school teasing her about her drawings. Honest, listening this time, realises this is the very thing Holiness had tried to tell her, days ago, before being cut off.",
+      "\"I'm sorry I didn't really listen,\" Honest tells her sister later, sitting on her bed instead of standing in the doorway giving instructions. \"Tell me again — properly, from the start.\" This time, she doesn't interrupt once, even when she has something to say.",
+      "Holiness talks for a long time. By the end, she doesn't even need Honest's advice — she'd mostly just needed someone to hear the whole thing. Honest learns something that night that no amount of being the eldest had taught her: sometimes the most helpful thing you can do is simply stop talking."
+    ],
+      moral:"Being helpful isn't always about having the right answer — sometimes it's about listening long enough to understand the real question.",
+      reflection:"Can you think of a time someone really listened to you? How did that feel?"
+    },
+    madeamistake: {
+      title:"The Boy Who Made a Mistake", subtitle:"Learning from mistakes", category:"growth", icon:"✏️", cover:"cover-coral", blurb:"Harry gets a maths problem wrong in front of the whole class — and discovers that mistakes aren't the disaster he feared.",
+      pages:[
+      "At Bolken Montessori School, the teacher calls Harry to the board to solve a maths problem in front of everyone. Harry, usually confident, freezes halfway through and writes the wrong answer. A couple of children giggle. Harry's ears turn hot and red.",
+      "He slumps back to his desk wanting to disappear into it. For the rest of the day, he avoids raising his hand at all, even when he's sure of an answer, just in case he's wrong again.",
+      "That evening, he tells Holiness he \"hates maths now,\" which isn't really true — he hates the feeling of being wrong in front of people. Mrs. Jahradien overhears and sits down with him. \"Can I tell you a secret?\" she says. \"Your father once mixed up an entire delivery order at his old job. The whole warehouse knew about it by lunchtime.\"",
+      "Harry can't imagine Mr. Charles getting anything wrong. \"What happened?\" he asks. \"He fixed it, apologised, and by next month, he understood the ordering system better than anyone else there — because he'd actually had to learn from getting it wrong.\"",
+      "The next day, Harry raises his hand again, gets a question wrong again — and this time, instead of shrinking, he asks the teacher to explain the part he missed. Getting it wrong stops feeling like the end of the story, and starts feeling like the middle of one."
+    ],
+      moral:"Mistakes aren't proof that you can't do something — they're often the exact place where real learning begins.",
+      reflection:"What's a mistake you've learned something important from?"
+    },
+    bigdream: {
+      title:"The Little Girl and the Big Dream", subtitle:"Dreams and ambition", category:"growth", icon:"🚀", cover:"cover-teal", blurb:"Holiness announces she wants to be an astronaut — and instead of laughing, her family helps her take the first tiny step.",
+      pages:[
+      "\"I want to go to space,\" Holiness announces at breakfast, entirely out of nowhere, spoon halfway to her mouth. Harry snorts into his cereal. \"You get scared of the deep end of the pool.\" Holiness's face falls, just slightly.",
+      "Mr. Charles doesn't laugh. \"Astronauts don't start in space,\" he says. \"They start somewhere much smaller — usually with a lot of questions.\" He asks Holiness what she actually knows about space. She admits: not very much, just that it looks beautiful in pictures.",
+      "That weekend, they visit the library together, and Holiness leaves with three books about planets, stars, and the moon, stacked nearly as tall as her arms can carry. She reads them slowly, sounding out the harder words, asking Honest for help with the tricky ones.",
+      "Weeks later, she can name all eight planets in order and explain, with great seriousness, why Pluto isn't one of them anymore. Harry, despite himself, starts asking her questions instead of teasing. \"So how do astronauts breathe up there?\" \"I don't know yet,\" Holiness admits proudly, \"but I'm going to find out.\"",
+      "She may never actually go to space — or she might. Nobody in the family pretends to know for certain. But Mrs. Jahradien notices something has changed: her daughter has learned that a big dream doesn't have to feel silly, as long as you're willing to take the small, real steps toward it."
+    ],
+      moral:"A big dream doesn't need to happen all at once — it starts with small, real steps, like asking questions and learning all you can.",
+      reflection:"What's a big dream you have? What's one small step you could take toward it?"
+    },
+    learnedpatient: {
+      title:"The Boy Who Learned to Be Patient", subtitle:"Patience", category:"values", icon:"⏳", cover:"cover-marigold", blurb:"Harry can't stand waiting for anything — until a slow Saturday queue teaches him something surprising.",
+      pages:[
+      "Harry does not wait well. Not for his turn on the swing, not for dinner to finish cooking, and certainly not for the long queue at the bank on Saturday morning, where Mr. Charles has brought him along on an errand.",
+      "\"How much longer?\" Harry asks for the fourth time in ten minutes, swinging his legs off the plastic chair. Mr. Charles doesn't answer with a number. Instead, he hands Harry a small notebook and pencil. \"Draw me everyone interesting you can see from here,\" he says.",
+      "Grumbling, Harry starts sketching — the security guard's enormous moustache, a baby fast asleep despite the noise, an old man reading a folded newspaper with great concentration. Slowly, without quite noticing, Harry stops asking how much longer.",
+      "By the time their number is finally called, Harry has filled two whole pages and is a little disappointed to have to stop drawing the woman with the extremely tall gele. \"That went fast,\" he admits, surprised at himself.",
+      "On the walk home, Mr. Charles points out that the wait hadn't actually gotten shorter — Harry's attention had just found somewhere better to be. \"Waiting is only boring,\" he says, \"if you spend it staring at the clock instead of the world around you.\""
+    ],
+      moral:"Patience gets easier when you stop watching the clock and start paying attention to what's actually around you.",
+      reflection:"What's something you could do next time you have to wait for something?"
+    },
+    welcomedstudent: {
+      title:"The Girl Who Welcomed a New Student", subtitle:"Inclusion", category:"school", icon:"🌍", cover:"cover-coral", blurb:"A shy new boy joins Holiness's class at Bolken Montessori School, still learning English — and Holiness finds a way to speak to him anyway.",
+      pages:[
+      "A new boy named Daniel joins Holiness's class partway through the term. He's just moved from a country where they speak a different language, and his English still comes out slow and careful, one word placed at a time like stepping stones.",
+      "At break, some children lose patience waiting for him to finish a sentence and wander off before he's done. Daniel eats his lunch alone under the mango tree, saying nothing to anyone, watching the games from a distance.",
+      "Holiness notices he's very good at drawing — better than anyone in the class, actually — filling the margins of his notebook with detailed little birds and cars. She sits beside him one day and simply points at his drawing, then at herself, then makes a drawing gesture. She doesn't need many words for this conversation.",
+      "Soon, without needing much language at all, they're drawing together every break time — Holiness sketching wobbly stick figures, Daniel sketching genuinely impressive birds, both of them laughing at the difference. His English improves week by week, but their friendship never needed to wait for it.",
+      "By the end of term, Daniel is teaching half the class a drawing trick he knows, translating a little for himself along the way, and Holiness realises that welcoming someone doesn't always start with words — sometimes it starts with simply making room beside you."
+    ],
+      moral:"You don't need to share a language perfectly to share kindness — sometimes all it takes is making room for someone.",
+      reflection:"How could you welcome someone who feels a little left out?"
+    },
+    respectdifferences: {
+      title:"The Boy Who Learned to Respect Differences", subtitle:"Respect", category:"school", icon:"🦽", cover:"cover-teal", blurb:"A new classmate uses a wheelchair to get around — and Harry has to unlearn his own awkward staring before he can make a real friend.",
+      pages:[
+      "When Chidi joins Harry's class at Bolken Montessori School, he arrives in a wheelchair, wheeling himself in with practised, easy movements. Harry, without quite meaning to, stares a beat too long, then looks away, embarrassed, unsure what to say or do.",
+      "At break, Harry hangs back instead of inviting Chidi to play football like he usually would with anyone new. It isn't unkindness exactly — it's not knowing, and being too shy to ask, which somehow feels worse.",
+      "It's Chidi himself who breaks the ice, rolling over to where Harry's kicking a ball alone. \"I can play goalkeeper,\" he offers. \"I'm actually really good at blocking shots.\" Harry, surprised, passes him the ball to test the claim — and Chidi blocks it easily, grinning.",
+      "Over the following weeks, Harry learns things he never would have guessed — that Chidi races his older cousins in wheelchair sprints and usually wins, that he hates being talked about instead of talked to, and that the questions Harry had been too awkward to ask (\"does it hurt?\", \"can I push it sometimes?\") were things Chidi didn't mind answering at all, once actually asked.",
+      "By the second month, nobody on the football pitch remembers a time before Chidi played goalkeeper — he's simply the best one they have. Harry realises that treating someone differently, even out of shyness, keeps you from actually getting to know them at all."
+    ],
+      moral:"Everyone deserves to be treated with curiosity and respect, not awkward silence — the best way past not knowing is simply to ask, kindly.",
+      reflection:"Have you ever felt unsure how to talk to someone different from you? What helped?"
+    },
+    helpedneighbor: {
+      title:"The Little Girl Who Helped Her Neighbor", subtitle:"Community", category:"friendship", icon:"🏡", cover:"cover-marigold", blurb:"Old Mama Ngozi next door can no longer carry her own water — and Holiness finds a small way to make a big difference.",
+      pages:[
+      "Mama Ngozi lives alone next door, and every few days, Holiness notices her struggling to carry a heavy bucket of water from the tap at the end of the street, resting every few steps, her back bent with the effort.",
+      "Holiness mentions it to Mrs. Jahradien, who doesn't rush over to fix it herself, but asks, \"What do you think you could do?\" Holiness considers this seriously. \"I could carry a smaller bucket for her. Not the big one. Just... some of it.\"",
+      "The next afternoon, Holiness fills her own small bucket at the tap and carries it, slowly and carefully, to Mama Ngozi's gate. The old woman looks startled, then deeply pleased. \"Aren't you a kind one,\" she says, patting Holiness's head with a wet, wrinkled hand.",
+      "It becomes a small routine — most days after school, Holiness brings one small bucket, chatting with Mama Ngozi for a few minutes about nothing in particular. Sometimes Harry tags along and carries a second bucket, turning it into something almost like a game.",
+      "Mama Ngozi starts saving Holiness stories from her own childhood, told in exchange for the water — about markets that no longer exist, about a town that used to look very different. Holiness realises she hasn't just been helping her neighbour; she's gained a friend twice her age with twice the stories."
+    ],
+      moral:"Small, consistent kindness — even something as simple as one bucket of water — can build real friendship and make a real difference.",
+      reflection:"Is there a neighbour or someone nearby who could use a small kindness from you?"
+    },
+    learnedtruth: {
+      title:"The Boy Who Learned to Tell the Truth", subtitle:"Trust", category:"values", icon:"🤥", cover:"cover-coral", blurb:"Harry tells one small lie to avoid trouble — and learns how quickly trust, once lost, has to be earned all over again.",
+      pages:[
+      "Harry finishes the last of the biscuits without asking, then, when Mrs. Jahradien asks who ate them, says simply, \"Not me.\" It's such a small lie, over such a small thing, that it barely feels like lying at all.",
+      "The trouble is, Mrs. Jahradien believes him — and spends the next hour quietly wondering if Holiness took them without asking, which isn't fair to Holiness at all. Harry watches his sister get a gentle talking-to for something she didn't do, and says nothing.",
+      "That night, Harry can't sleep properly. It isn't guilt exactly, or maybe it is — a small, itchy, uncomfortable feeling that follows him around like a shadow he can't shake. In the morning, he finally tells Mrs. Jahradien the truth, and apologises to Holiness too.",
+      "Mrs. Jahradien isn't angry about the biscuits at all — she never was. What upsets her more is realising she can no longer be quite as sure when Harry tells her something. \"Trust is like a mirror,\" she tells him gently. \"Once it's cracked, you can fix it, but you'll always see the crack for a while.\"",
+      "For weeks after, Harry makes a point of telling the truth even about small, unimportant things — not because he's asked to, but because he remembers exactly how uncomfortable that itchy feeling was, and how long it took for his mother's easy trust to fully return."
+    ],
+      moral:"Small lies can still cost big trust — and trust, once broken, takes real time and honesty to rebuild.",
+      reflection:"Why do you think telling the truth matters, even about small things?"
+    },
+    toobusyplaying: {
+      title:"The Girl Who Was Too Busy Playing", subtitle:"Balance", category:"school", icon:"⏰", cover:"cover-teal", blurb:"Holiness keeps putting off her homework for \"just five more minutes\" of play — until the night before catches up with her.",
+      pages:[
+      "Every day after Bolken Montessori School, Holiness has the same plan: play first, homework after. Every day, \"after\" somehow keeps sliding later and later, pushed back by one more game, one more chapter of a story, one more anything.",
+      "By Thursday night, she has an entire week's worth of maths sheets waiting, and a spelling test the very next morning she hasn't studied a single word for. She stares at the pile, stomach sinking, wishing she'd started literally any of the previous four evenings.",
+      "Mr. Charles doesn't do the work for her, and doesn't lecture her either — he simply sits with her at the table while she works late, later than bedtime should allow, yawning over her spelling words.",
+      "The spelling test the next day goes badly — not terribly, but nowhere near as well as it could have with proper studying. Holiness comes home more disappointed in herself than she's ever felt about a school test.",
+      "The following week, without being asked, Holiness tries something new: twenty minutes of homework the moment she gets home, before any playing starts at all. To her surprise, the rest of her afternoon feels lighter — the playing is somehow more fun when nothing's hanging over it."
+    ],
+      moral:"Doing the important thing first — even when it's less fun — often makes the fun things that follow feel even better.",
+      reflection:"What's something you tend to put off? What might happen if you did it first instead?"
+    },
+    staycalm: {
+      title:"The Boy Who Learned to Stay Calm", subtitle:"Managing emotions", category:"feelings", icon:"🌬️", cover:"cover-marigold", blurb:"When his tower of blocks gets knocked over for the third time, Harry learns a new way to handle the fire in his chest.",
+      pages:[
+      "Harry has built the same block tower three times, and three times, Holiness's cat has knocked it flying while chasing an invisible something across the living room floor. On the third collapse, Harry doesn't just get upset — he shouts, kicks the remaining blocks across the room, and stomps to his bedroom, slamming the door.",
+      "Mr. Charles finds him sitting on the bed, still fuming, fists clenched. He doesn't tell Harry to calm down — Harry has heard that phrase a hundred times, and it has never once worked. Instead, he sits down and says, \"Tell me what that felt like, right when the tower fell the third time.\"",
+      "\"Like fire,\" Harry says, surprising himself with how exactly that describes it. \"Like it just came out before I could stop it.\" Father nods. \"Next time you feel the fire starting, try this — breathe in slowly for four counts, and out for four counts, before you do anything else at all.\"",
+      "Harry is doubtful something so simple could help with something that feels so big. But the very next week, when his kite string snaps mid-flight, he feels the familiar fire rising — and, almost without deciding to, counts four breaths in, four breaths out.",
+      "It doesn't make the disappointment disappear. But by the fourth breath, the fire has cooled just enough that Harry can say \"that's really annoying\" instead of throwing the kite reel across the yard. Small progress, Mr. Charles tells him later, is still progress."
+    ],
+      moral:"Big feelings are normal — learning a small pause, like a few slow breaths, can help you choose what to do with them.",
+      reflection:"What helps you calm down when you feel really upset or angry?"
+    },
+    lovedreading: {
+      title:"The Little Girl Who Loved Reading", subtitle:"Education", category:"school", icon:"📚", cover:"cover-coral", blurb:"Honest would rather read than do almost anything else — until she learns that even the best books need to sometimes be put down.",
+      pages:[
+      "Honest reads everywhere — at the dinner table (until reminded), in the car, under her blanket with a torch long after bedtime. Books are, without question, her favourite thing in the entire world, ahead of even dessert.",
+      "One Saturday, Holiness invites her to play outside, but Honest is deep in a story about a girl exploring a hidden cave, and waves her off without really looking up. Holiness plays alone that afternoon, and doesn't ask again the next day.",
+      "That evening, Mrs. Jahradien gently points out that Honest has read three whole books this week and spent almost no time with her siblings. \"Books can take you anywhere,\" she says, \"but don't let them take you away from the people right in front of you.\"",
+      "Honest thinks about this properly for the first time. The next weekend, she still reads — she couldn't stop entirely even if she tried — but she also puts the book down when Holiness asks her to play, and even reads a chapter out loud to both twins before bed, doing all the voices.",
+      "She discovers something unexpected: sharing a story out loud, watching Harry and Holiness's faces light up at the exciting parts, feels almost as good as reading silently to herself. Some stories, it turns out, are even better together."
+    ],
+      moral:"Loving something, like reading, is wonderful — just remember to leave room for the people around you too.",
+      reflection:"What's your favourite way to spend time — alone, or with others? Can you find a way to enjoy both?"
+    },
+    learnedsayno: {
+      title:"The Boy Who Learned to Say No", subtitle:"Personal boundaries and safety", category:"values", icon:"🛑", cover:"cover-teal", blurb:"An older boy at the park keeps pushing Harry to try something risky — and Harry discovers that \"no\" can be a complete sentence.",
+      pages:[
+      "At the park, an older boy named Femi dares Harry to climb over the fence into the construction site next door, \"just to look.\" Harry's stomach does a nervous flip — there are warning signs everywhere, and the ground beyond looks uneven and unsafe.",
+      "\"Come on, don't be scared,\" Femi pushes, and a couple of the other boys start chanting Harry's name. Harry feels his face go hot, torn between the fear of the site and the fear of looking like the only one who won't go.",
+      "He remembers something Mrs. Jahradien told him once, almost in passing: \"If something feels wrong in your stomach, you're allowed to say no — even if everyone else is doing it. You don't owe anyone an explanation for keeping yourself safe.\"",
+      "\"No,\" Harry says, and to his own surprise, it comes out steady. \"That's not safe. I'm not doing it.\" A couple of boys laugh, but Harry stays exactly where he is, arms crossed, and after a minute, the moment passes — Femi shrugs and finds something else to dare someone into.",
+      "That evening, Harry tells his parents about it, half-expecting to be told he should have just gone along with the group. Instead, Mr. Charles looks genuinely proud. \"That,\" he says, \"was one of the bravest things you've done all year — and nobody even saw you do it.\""
+    ],
+      moral:"Saying no to something unsafe, even when others push you, is a real form of courage — and you never need permission to protect yourself.",
+      reflection:"Can you think of a time it was hard to say no? What helped you decide?"
+    },
+    workasteam: {
+      title:"The Girl Who Learned to Work as a Team", subtitle:"Teamwork", category:"friendship", icon:"🏗️", cover:"cover-marigold", blurb:"Holiness wants to build the tallest block tower in her class all by herself — until she discovers what a team can build that she can't.",
+      pages:[
+      "At Bolken Montessori School, the class is split into teams to build the tallest tower out of blocks and tape. Holiness, convinced she has the best ideas, tries to direct everyone else exactly how to do it — \"No, not there, put it here, like THIS\" — while barely listening to anyone's suggestions.",
+      "Her teammates stop offering ideas altogether after a while, just quietly doing whatever Holiness says, arms crossed, unimpressed. The tower they build is fine. Not great. Just fine.",
+      "Meanwhile, the team next to them — working, laughing, arguing a little, but genuinely listening to each other — builds something taller and sturdier, with a clever wide base that Holiness never would have thought of alone.",
+      "The teacher doesn't scold Holiness's team; she just asks each group to explain how they built theirs. When the winning team describes taking turns suggesting ideas, Holiness realises, with a small sting of embarrassment, exactly what she did differently.",
+      "The next group project, Holiness tries something new: she asks a question before giving an instruction. \"What do you think we should try?\" Her team's tower still isn't the tallest that day — but it's the one she's proudest of, because for once, it wasn't only her tower. It was theirs."
+    ],
+      moral:"A team is stronger when everyone's ideas are heard — leading isn't about being the loudest voice, but the one who listens best.",
+      reflection:"Have you ever worked on something as a team? What made it work well, or not so well?"
+    },
+    discoveredtalent: {
+      title:"The Boy Who Discovered His Talent", subtitle:"Creativity", category:"growth", icon:"🎨", cover:"cover-coral", blurb:"Harry thinks he's bad at everything artistic — until a rainy afternoon accident reveals a talent nobody expected.",
+      pages:[
+      "Harry has never thought of himself as artistic. His drawings look, in his own words, \"like a spider fell in ink and walked across the page.\" He avoids the art table at school whenever he can, certain it isn't his thing.",
+      "One rainy afternoon at home, bored and restless, Harry starts absentmindedly folding a piece of paper — not drawing, just folding, over and over, half by accident. By the time he notices what he's made, it looks almost exactly like a bird, wings and all.",
+      "Holiness, wandering past, stops dead. \"How did you DO that?\" Harry, just as surprised as she is, tries to remember the folds and does it again — slower this time, on purpose. It works again.",
+      "Over the following days, Harry folds anything he can find — old homework sheets, newspaper, even a banknote once (which does not go over well) — animals, boats, a surprisingly convincing star. He shows Mr. Charles, who looks genuinely amazed and asks him to teach him one.",
+      "At school, Harry brings a folded paper crane to show his teacher, half-expecting her to shrug. Instead, she asks him to teach the whole class during art time — the very art table he'd been avoiding all year. Harry realises talent doesn't always look like the thing everyone else is already good at; sometimes it's hiding in something nobody's tried yet."
+    ],
+      moral:"Talent doesn't always look the way you expect — sometimes you have to try unexpected things to discover what you're actually good at.",
+      reflection:"Have you ever surprised yourself by being good at something you didn't expect?"
+    },
+    learnedgrateful: {
+      title:"The Little Girl Who Learned to Be Grateful", subtitle:"Appreciation", category:"feelings", icon:"🙏", cover:"cover-teal", blurb:"Honest complains about everything from breakfast to her school bag — until a conversation with Grandma changes how she sees her ordinary day.",
+      pages:[
+      "\"This bread is boring. My school bag is old. Why can't we have a bigger television like the Adeyemis?\" Honest's list of complaints seems to grow a little longer every single morning, even though, if she's honest with herself (which, being Honest, she generally tries to be), nothing is actually wrong.",
+      "One weekend at Grandma's house, Honest starts up her usual list — the tea is too weak, the chair is uncomfortable. Grandma listens patiently, then asks quietly, \"Did you eat this morning?\" \"Yes,\" Honest says, confused by the question. \"Did you sleep somewhere warm and dry?\" \"Yes, obviously.\" \"Did anyone who loves you wish you a good morning?\"",
+      "Honest starts to see where this is going, and feels a small twinge of embarrassment. Grandma tells her about mornings, long ago, when there wasn't always enough bread to go around, let alone a choice of what kind.",
+      "\"I'm not telling you never to want things,\" Grandma says gently. \"Wanting things is normal. I'm asking you to notice what you already have, at the very same time.\" That evening, Honest tries something new — before bed, she names three good things about her actual, ordinary day, out loud, to anyone who'll listen.",
+      "It becomes a habit that sticks. Some nights the list is small — \"the rice was nice today\" — and some nights it's bigger. But Honest's mornings grow noticeably shorter on complaints, and her evenings grow steadily longer on the small, ordinary things she'd almost stopped noticing at all."
+    ],
+      moral:"Gratitude doesn't mean you can't want more — it means noticing and appreciating what you already have, right now.",
+      reflection:"What are three good things about your day today?"
+    },
+    nevergaveup: {
+      title:"The Boy Who Never Gave Up", subtitle:"Perseverance", category:"courage", icon:"🏁", cover:"cover-marigold", blurb:"Harry wants to win the school's Sports Day race so badly — and has to decide what to do after coming in last, three years running.",
+      pages:[
+      "Every year at Bolken Montessori School's Sports Day, Harry runs the 100-metre race. Every year, for two years running, he comes in dead last, watching everyone else cross the finish line while he's still pumping his arms halfway down the track.",
+      "After the second year, Harry tells his family he's not running it a third time. \"What's the point,\" he mutters, \"if I already know I'll lose?\" Mrs. Jahradien doesn't argue with him about it that night. She just asks one question: \"Do you want to be good at running, or do you want to have never tried?\"",
+      "Harry thinks about this for days. Eventually, quietly, without announcing it to anyone, he starts running laps around the compound most evenings after school — not fast, not for long, just a little further each week than the week before.",
+      "Nobody times him. Nobody watches, except sometimes Holiness, cheering from the veranda like he's already won something. By the time the third Sports Day arrives, Harry isn't sure if any of it mattered. His stomach is a knot of nerves at the starting line, same as every year.",
+      "The gun fires. Harry doesn't come first — not even close. But for the first time in three years, he isn't last either, crossing the line with two boys still behind him, chest heaving, grinning wider than any winner on the podium. Coming in fourth had never felt so much like winning."
+    ],
+      moral:"Progress doesn't always look like winning — sometimes it just looks like being a little further along than you were before.",
+      reflection:"What's something you've kept trying at, even when it was hard? How did it feel to keep going?"
+    },
+    davidgoliath: {
+      title:"David and the Giant", subtitle:"Courage and Faith", category:"bible", icon:"🪨", cover:"cover-teal", blurb:"On a quiet Sunday evening, Mr. Charles tells the children the story of a shepherd boy who faced a giant with nothing but faith and a sling.",
+      pages:[
+      "Every Sunday evening, after church, the Charles family gathers on the veranda for what Mr. Charles calls \"story and scripture time.\" Tonight, he settles into his chair and begins: \"Long ago, in the land of Israel, there was a shepherd boy named David, the youngest of eight brothers, who spent his days watching over his father's sheep.\"",
+      "\"One day, David's older brothers went off to fight in King Saul's army against the Philistines. But the Philistine army had a champion — a giant warrior named Goliath, over nine feet tall, who mocked the Israelite soldiers every single day, daring anyone to fight him. Every soldier who saw him was too afraid to answer.\"",
+      "Harry leans forward. \"Even the grown-up soldiers were scared?\" \"Even the grown-up soldiers,\" Mr. Charles nods. \"But when David visited his brothers with food from home and heard Goliath's taunts, he wasn't afraid at all. He told King Saul, 'I have protected my father's sheep from lions and bears. This giant is no different — I will fight him.'\"",
+      "\"The king offered David his own armour, heavy and clanking, far too big for a shepherd boy. David set it aside. Instead, he picked up five smooth stones from a stream and walked toward Goliath with only his sling and his faith. 'You come against me with a sword,' David called out, 'but I come against you in the name of the One who made the heavens and the earth.'\"",
+      "\"David swung his sling — just once — and the stone struck Goliath exactly between the eyes. The giant fell, and the whole Philistine army fled.\" Holiness lets out a breath she didn't know she was holding. \"He wasn't even scared,\" she says quietly. Mr. Charles smiles. \"He wasn't scared, because he wasn't trusting in his own strength alone. That's something worth remembering — being small doesn't mean you can't do something big.\""
+      ],
+      moral:"Courage doesn't always come from being the biggest or strongest — sometimes the smallest among us can do the bravest things, especially with faith to guide them.",
+      reflection:"Can you think of a time you felt small or unsure, but found the courage to try anyway?"
+    }
+  };
+
+  var READING_ORDER = [
+    "vase",
+    "bicycle",
+    "newgirl",
+    "mirror",
+    "rain",
+    "littleseed",
+    "twobestfriends",
+    "honestboy",
+    "afraidtotry",
+    "helpfulbrother",
+    "saysorry",
+    "sharedlunch",
+    "cleverant",
+    "wantedeverything",
+    "littlechef",
+    "learnedtosave",
+    "cleanedroom",
+    "kindtoanimal",
+    "treeneedfriends",
+    "learnedlisten",
+    "madeamistake",
+    "bigdream",
+    "learnedpatient",
+    "welcomedstudent",
+    "respectdifferences",
+    "helpedneighbor",
+    "learnedtruth",
+    "toobusyplaying",
+    "staycalm",
+    "lovedreading",
+    "learnedsayno",
+    "workasteam",
+    "discoveredtalent",
+    "learnedgrateful",
+    "nevergaveup",
+    "davidgoliath"
+  ];
+
+  var ADVENTURE_CARD = { id:'treasure', title:'The Treasure Hunt', subtitle:'Family Adventure', category:'family', icon:'\ud83d\uddfa\ufe0f', cover:'cover-teal', blurb:"An interactive adventure \u2014 your choices decide how the Charles family's Saturday unfolds.", type:'adventure' };
+
+  /* ================= LIBRARY: SEARCH + FILTER + GRID ================= */
+  var grid = document.getElementById('story-grid');
+  var searchInput = document.getElementById('story-search');
+  var filterRow = document.getElementById('category-filters');
+  var activeCategory = 'all';
+
+  function cardMeta(id){
+    if(id === 'treasure') return ADVENTURE_CARD;
+    var s = STORY_DATA[id];
+    return { id:id, title:s.title, subtitle:s.subtitle, category:s.category, icon:s.icon, cover:s.cover, blurb:s.blurb, type:'story' };
+  }
+  var ALL_CARD_IDS = ['treasure'].concat(READING_ORDER);
+
+  CATEGORIES.forEach(function(c){
+    var pill = document.createElement('button');
+    pill.className = 'filter-pill' + (c.id==='all' ? ' active' : '');
+    pill.type = 'button';
+    pill.dataset.cat = c.id;
+    pill.innerHTML = c.icon + ' ' + c.label;
+    pill.addEventListener('click', function(){
+      activeCategory = c.id;
+      Array.prototype.forEach.call(filterRow.querySelectorAll('.filter-pill'), function(p){ p.classList.remove('active'); });
+      pill.classList.add('active');
+      renderGrid();
+    });
+    filterRow.appendChild(pill);
+  });
+  searchInput.addEventListener('input', renderGrid);
+  renderGrid();
+
+  function renderGrid(){
+    var term = searchInput.value.trim().toLowerCase();
+    grid.innerHTML = '';
+    var shown = 0;
+    ALL_CARD_IDS.forEach(function(id){
+      var m = cardMeta(id);
+      var matchesCat = (activeCategory === 'all') || (m.category === activeCategory);
+      var matchesSearch = !term || (m.title.toLowerCase().indexOf(term) > -1) || (m.subtitle.toLowerCase().indexOf(term) > -1) || (m.blurb.toLowerCase().indexOf(term) > -1);
+      if(!matchesCat || !matchesSearch) return;
+      shown++;
+      var card = document.createElement('button');
+      card.className = 'story-card';
+      card.innerHTML =
+        '<div class="story-cover ' + m.cover + '"><span>' + m.icon + '</span></div>' +
+        '<div class="story-body"><div class="story-theme">' + m.subtitle + '</div><h3>' + m.title + '</h3><p>' + m.blurb + '</p>' +
+        '<div class="story-cta">' + (m.type==='adventure' ? 'Play the adventure' : 'Read Story') + '</div></div>';
+      card.addEventListener('click', function(){ openStory(m.id, m.type); });
+      grid.appendChild(card);
+    });
+    var empty = document.getElementById('grid-empty');
+    if(empty) empty.remove();
+    if(shown === 0){
+      var msg = document.createElement('div');
+      msg.id = 'grid-empty';
+      msg.className = 'grid-empty';
+      msg.textContent = "No stories match yet \u2014 try a different search or category.";
+      grid.parentNode.insertBefore(msg, grid.nextSibling);
+    }
+  }
+
+  var libraryScreen = document.getElementById('library-screen');
+  var readerScreen = document.getElementById('reader-screen');
+  var readerPage = document.getElementById('reader-page');
+  var advTitleScreen = document.getElementById('adv-title-screen');
+  var advFamilyScreen = document.getElementById('adv-family-screen');
+  var advStoryScreen = document.getElementById('adv-story-screen');
+
+  function showLibrary(){
+    stopSpeech();
+    readerScreen.classList.add('hidden');
+    advTitleScreen.classList.add('hidden');
+    advFamilyScreen.classList.add('hidden');
+    advStoryScreen.classList.add('hidden');
+    libraryScreen.classList.remove('hidden');
+  }
+  document.getElementById('reader-back-btn').addEventListener('click', showLibrary);
+  document.getElementById('adv-back-btn').addEventListener('click', showLibrary);
+
+  function openStory(id, type){
+    if(type === 'adventure'){
+      libraryScreen.classList.add('hidden');
+      advTitleScreen.classList.remove('hidden');
+    } else {
+      libraryScreen.classList.add('hidden');
+      readerScreen.classList.remove('hidden');
+      openLinearStory(id);
+    }
+  }
+
+  /* ================= LINEAR STORY READER ================= */
+  var currentStoryId = null;
+  var currentPageIndex = 0;
+
+  function openLinearStory(id){
+    currentStoryId = id;
+    currentPageIndex = 0;
+    renderReaderPage();
+  }
+
+  function storyNavRow(){
+    var idx = READING_ORDER.indexOf(currentStoryId);
+    var prevId = idx > 0 ? READING_ORDER[idx-1] : null;
+    var nextId = idx < READING_ORDER.length-1 ? READING_ORDER[idx+1] : null;
+    var html = '<div class="story-nav-row">';
+    html += prevId ? '<button class="story-nav-btn" id="prev-story-btn">\u25c0 ' + STORY_DATA[prevId].title + '</button>' : '<span></span>';
+    html += '<button class="story-nav-btn mid" id="lib-from-reader-btn">\ud83d\udcda All Stories</button>';
+    html += nextId ? '<button class="story-nav-btn" id="next-story-btn">' + STORY_DATA[nextId].title + ' \u25b6</button>' : '<span></span>';
+    html += '</div>';
+    return { html:html, prevId:prevId, nextId:nextId };
+  }
+
+  function renderReaderPage(){
+    stopSpeech();
+    var story = STORY_DATA[currentStoryId];
+    var isMoralPage = currentPageIndex === story.pages.length;
+    var nav = storyNavRow();
+
+    var html = '<div class="page-icon-panel ' + story.cover + '">' + (isMoralPage ? '\ud83d\udca1' : story.icon) + '</div>';
+    html += '<h2 class="reader-title">' + story.title + '</h2>';
+    html += '<div class="reader-subtitle">' + story.subtitle + '</div>';
+    html += '<div class="reader-page-count">' + (isMoralPage ? 'The Moral' : ('Page ' + (currentPageIndex+1) + ' of ' + story.pages.length)) + '</div>';
+
+    if(isMoralPage){
+      html += '<div class="moral-box"><b>Moral of the Story:</b> ' + story.moral + '</div>';
+      html += '<div class="reflect-box">\ud83d\udcac What Did You Learn? ' + story.reflection + '</div>';
+      html += '<div class="final-actions"><button class="nav-btn" id="read-again-btn">Read Again</button></div>';
+    } else {
+      html += '<div class="reader-text" id="reader-text">' + story.pages[currentPageIndex] + '</div>';
+      html += '<div class="reader-controls">' +
+        '<div class="audio-controls">' +
+          '<button class="audio-btn" id="audio-btn">\u25b6\ufe0f Read Aloud</button>' +
+          '<button class="audio-btn stop" id="stop-btn">\u23f9 Stop</button>' +
+          '<span class="reading-dot" id="reading-dot"></span>' +
+        '</div>' +
+        '<div class="nav-btns">' +
+          '<button class="nav-btn secondary" id="prev-page-btn"' + (currentPageIndex===0 ? ' disabled' : '') + '>\u2190 Back</button>' +
+          '<button class="nav-btn" id="next-page-btn">Next \u2192</button>' +
+        '</div>' +
+      '</div>';
+    }
+    html += nav.html;
+    readerPage.innerHTML = html;
+
+    document.getElementById('lib-from-reader-btn').addEventListener('click', showLibrary);
+    if(nav.prevId) document.getElementById('prev-story-btn').addEventListener('click', function(){ openLinearStory(nav.prevId); });
+    if(nav.nextId) document.getElementById('next-story-btn').addEventListener('click', function(){ openLinearStory(nav.nextId); });
+
+    if(isMoralPage){
+      document.getElementById('read-again-btn').addEventListener('click', function(){ currentPageIndex = 0; renderReaderPage(); });
+    } else {
+      var audioBtn = document.getElementById('audio-btn');
+      var stopBtn = document.getElementById('stop-btn');
+      var dot = document.getElementById('reading-dot');
+      audioBtn.addEventListener('click', function(){ toggleReadAloud(story.pages[currentPageIndex], audioBtn, dot); });
+      stopBtn.addEventListener('click', function(){ stopSpeech(); updateAudioUI(audioBtn, dot); });
+      document.getElementById('prev-page-btn').addEventListener('click', function(){
+        if(currentPageIndex > 0){ currentPageIndex -= 1; renderReaderPage(); }
+      });
+      document.getElementById('next-page-btn').addEventListener('click', function(){
+        currentPageIndex += 1; renderReaderPage();
+      });
+    }
+  }
+
+  /* ================= INTERACTIVE ADVENTURE ================= */
+  var FAMILY = [
+    { avatarSvg:"<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M15,100 Q15,72 50,70 Q85,72 85,100 Z\" fill=\"#1F9E7A\"/><path d=\"M43,72 L50,80 L57,72 L54,68 L46,68 Z\" fill=\"#FBF3E7\"/><rect x=\"42\" y=\"56\" width=\"16\" height=\"16\" rx=\"6\" fill=\"#C48958\"/><circle cx=\"50\" cy=\"42\" r=\"26\" fill=\"#C48958\"/><circle cx=\"25\" cy=\"44\" r=\"4\" fill=\"#C48958\"/><circle cx=\"75\" cy=\"44\" r=\"4\" fill=\"#C48958\"/><path d=\"M24,40 Q24,12 50,12 Q76,12 76,40 Q76,24 50,22 Q24,24 24,40 Z\" fill=\"#2A2118\"/><circle cx=\"41\" cy=\"42\" r=\"3\" fill=\"#2A2118\"/><circle cx=\"59\" cy=\"42\" r=\"3\" fill=\"#2A2118\"/><path d=\"M35,34 Q41,31 47,34\" stroke=\"#2A2118\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M53,34 Q59,31 65,34\" stroke=\"#2A2118\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M41,52 Q50,55 59,52\" stroke=\"#2A2118\" stroke-width=\"2.5\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M40,58 Q50,64 60,58\" stroke=\"#2A2118\" stroke-width=\"2.5\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M30,50 Q32,64 50,67 Q68,64 70,50\" stroke=\"#2A2118\" stroke-width=\"3\" fill=\"none\" opacity=\"0.35\" stroke-linecap=\"round\"/></svg>", name:'Mr. Charles', role:'Father', trait:'Wise, steady, and always fair.', ring:'#1F9E7A' },
+    { avatarSvg:"<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M15,100 Q15,72 50,70 Q85,72 85,100 Z\" fill=\"#E85D4E\"/><circle cx=\"27\" cy=\"70\" r=\"2.5\" fill=\"#F4C542\"/><circle cx=\"73\" cy=\"70\" r=\"2.5\" fill=\"#F4C542\"/><rect x=\"42\" y=\"56\" width=\"16\" height=\"16\" rx=\"6\" fill=\"#C48958\"/><circle cx=\"50\" cy=\"42\" r=\"26\" fill=\"#C48958\"/><circle cx=\"25\" cy=\"50\" r=\"3\" fill=\"#F4C542\"/><circle cx=\"75\" cy=\"50\" r=\"3\" fill=\"#F4C542\"/><path d=\"M20,38 Q20,10 50,8 Q80,10 80,38 Q80,20 50,18 Q20,20 20,38 Z\" fill=\"#F4A93B\"/><path d=\"M62,10 L74,2 L71,17 Z\" fill=\"#E85D4E\"/><path d=\"M28,22 Q50,14 72,22\" stroke=\"#E4933A\" stroke-width=\"2\" fill=\"none\" opacity=\"0.6\"/><circle cx=\"41\" cy=\"42\" r=\"3\" fill=\"#2A2118\"/><circle cx=\"59\" cy=\"42\" r=\"3\" fill=\"#2A2118\"/><path d=\"M36,33 Q41,30 46,33\" stroke=\"#2A2118\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M54,33 Q59,30 64,33\" stroke=\"#2A2118\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M39,57 Q50,65 61,57\" stroke=\"#2A2118\" stroke-width=\"2.5\" fill=\"none\" stroke-linecap=\"round\"/></svg>", name:'Mrs. Jahradien Charles', role:'Mother', trait:'Warm-hearted and makes sure no one is left out.', ring:'#E85D4E' },
+    { avatarSvg:"<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M18,100 Q18,74 50,72 Q82,74 82,100 Z\" fill=\"#F4A93B\"/><rect x=\"43\" y=\"58\" width=\"14\" height=\"14\" rx=\"6\" fill=\"#C48958\"/><circle cx=\"50\" cy=\"46\" r=\"24\" fill=\"#C48958\"/><circle cx=\"24\" cy=\"34\" r=\"13\" fill=\"#2A2118\"/><circle cx=\"76\" cy=\"34\" r=\"13\" fill=\"#2A2118\"/><circle cx=\"50\" cy=\"20\" r=\"11\" fill=\"#2A2118\"/><circle cx=\"24\" cy=\"44\" r=\"3\" fill=\"#E85D4E\"/><circle cx=\"76\" cy=\"44\" r=\"3\" fill=\"#E85D4E\"/><circle cx=\"41\" cy=\"46\" r=\"7\" fill=\"none\" stroke=\"#2A2118\" stroke-width=\"2\"/><circle cx=\"59\" cy=\"46\" r=\"7\" fill=\"none\" stroke=\"#2A2118\" stroke-width=\"2\"/><line x1=\"48\" y1=\"46\" x2=\"52\" y2=\"46\" stroke=\"#2A2118\" stroke-width=\"2\"/><circle cx=\"41\" cy=\"46\" r=\"2\" fill=\"#2A2118\"/><circle cx=\"59\" cy=\"46\" r=\"2\" fill=\"#2A2118\"/><path d=\"M42,60 Q50,66 58,60\" stroke=\"#2A2118\" stroke-width=\"2.5\" fill=\"none\" stroke-linecap=\"round\"/></svg>", name:'Honest', role:'Elder Sister', trait:'Named for a reason — she always tells the truth.', ring:'#F4A93B' },
+    { avatarSvg:"<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M18,100 Q18,74 50,72 Q82,74 82,100 Z\" fill=\"#1F9E7A\"/><rect x=\"43\" y=\"58\" width=\"14\" height=\"14\" rx=\"6\" fill=\"#C48958\"/><circle cx=\"50\" cy=\"46\" r=\"24\" fill=\"#C48958\"/><circle cx=\"26\" cy=\"48\" r=\"4\" fill=\"#C48958\"/><circle cx=\"74\" cy=\"48\" r=\"4\" fill=\"#C48958\"/><circle cx=\"50\" cy=\"20\" r=\"17\" fill=\"#2A2118\"/><path d=\"M50,6 L58,0 L58,10 L50,14 L42,10 L42,0 Z\" fill=\"#E85D4E\"/><circle cx=\"41\" cy=\"46\" r=\"3\" fill=\"#2A2118\"/><circle cx=\"59\" cy=\"46\" r=\"3\" fill=\"#2A2118\"/><path d=\"M36,38 Q41,35 46,38\" stroke=\"#2A2118\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M54,38 Q59,35 64,38\" stroke=\"#2A2118\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M41,60 Q50,66 59,60\" stroke=\"#2A2118\" stroke-width=\"2.5\" fill=\"none\" stroke-linecap=\"round\"/></svg>", name:'Holiness', role:'Twin', trait:'Gentle-hearted and quick to share.', ring:'#1F9E7A' },
+    { avatarSvg:"<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M18,100 Q18,74 50,72 Q82,74 82,100 Z\" fill=\"#E85D4E\"/><rect x=\"43\" y=\"58\" width=\"14\" height=\"14\" rx=\"6\" fill=\"#C48958\"/><circle cx=\"50\" cy=\"46\" r=\"24\" fill=\"#C48958\"/><circle cx=\"26\" cy=\"48\" r=\"4\" fill=\"#C48958\"/><circle cx=\"74\" cy=\"48\" r=\"4\" fill=\"#C48958\"/><circle cx=\"30\" cy=\"26\" r=\"8\" fill=\"#2A2118\"/><circle cx=\"44\" cy=\"20\" r=\"9\" fill=\"#2A2118\"/><circle cx=\"58\" cy=\"20\" r=\"9\" fill=\"#2A2118\"/><circle cx=\"70\" cy=\"26\" r=\"8\" fill=\"#2A2118\"/><circle cx=\"50\" cy=\"16\" r=\"9\" fill=\"#2A2118\"/><circle cx=\"41\" cy=\"46\" r=\"3\" fill=\"#2A2118\"/><circle cx=\"59\" cy=\"46\" r=\"3\" fill=\"#2A2118\"/><path d=\"M36,37 Q41,34 46,37\" stroke=\"#2A2118\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M55,35 Q60,39 65,36\" stroke=\"#2A2118\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M38,58 Q50,68 63,55\" stroke=\"#2A2118\" stroke-width=\"2.5\" fill=\"none\" stroke-linecap=\"round\"/></svg>", name:'Harry', role:'Twin', trait:'Bold, curious, and first to explore.', ring:'#E85D4E' }
+  ];
+  var familyGrid = document.getElementById('family-grid');
+  FAMILY.forEach(function(m){
+    var card = document.createElement('div');
+    card.className = 'fam-card';
+    card.innerHTML =
+      '<div class="avatar" style="border-color:'+m.ring+'">'+m.avatarSvg+'</div>' +
+      '<h4>'+m.name+'</h4><div class="role">'+m.role+'</div><div class="trait">'+m.trait+'</div>';
+    familyGrid.appendChild(card);
+  });
+
+  document.getElementById('meet-family-btn').addEventListener('click', function(){
+    advTitleScreen.classList.add('hidden');
+    advFamilyScreen.classList.remove('hidden');
+  });
+  document.getElementById('start-story-btn').addEventListener('click', function(){
+    advFamilyScreen.classList.add('hidden');
+    advStoryScreen.classList.remove('hidden');
+    startAdventure();
+  });
+
+  var advProgressDots = document.getElementById('progress-dots');
+  var advPage = document.getElementById('story-page-adv');
+
+  function setAdvProgress(chapter, total){
+    advProgressDots.innerHTML = '';
+    for(var i=1;i<=total;i++){
+      var d = document.createElement('div');
+      d.className = 'pdot' + (i<=chapter ? ' on' : '');
+      advProgressDots.appendChild(d);
+    }
+  }
+
+  var advStats = { honesty:0, kindness:0, courage:0 };
+  var advEndingsFound = {};
+
+  function renderAdvShell(chapterNum, tag, title, bodyHtml){
+    advPage.innerHTML =
+      '<div class="chapter-tag">'+tag+'</div>' +
+      '<h2 class="chapter-title">'+title+'</h2>' +
+      '<div class="story-text">'+bodyHtml+'</div>' +
+      '<div id="adv-interactive"></div>';
+    setAdvProgress(chapterNum, 5);
+    advPage.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+  function addAdvContinue(label, onClick){
+    var row = document.createElement('div');
+    row.className = 'continue-row';
+    var btn = document.createElement('button');
+    btn.className = 'continue-btn'; btn.textContent = label || 'Continue';
+    btn.addEventListener('click', onClick);
+    row.appendChild(btn);
+    document.getElementById('adv-interactive').appendChild(row);
+  }
+  function addAdvRiddle(options, correctIndex, onDone){
+    var wrap = document.getElementById('adv-interactive');
+    var list = document.createElement('div'); list.className = 'choice-list';
+    var feedback = document.createElement('div'); feedback.className = 'riddle-feedback';
+    var answered = false;
+    options.forEach(function(opt, idx){
+      var btn = document.createElement('button'); btn.className = 'choice-btn'; btn.textContent = opt;
+      btn.addEventListener('click', function(){
+        if(answered) return; answered = true;
+        if(idx === correctIndex){ btn.classList.add('is-correct'); feedback.textContent = "That's it! " + opt + " it is."; playTone('correct'); }
+        else { btn.classList.add('is-wrong'); feedback.textContent = "Close! The answer was really \"" + options[correctIndex] + "\" — but the story goes on."; playTone('wrong'); }
+        Array.prototype.forEach.call(list.querySelectorAll('.choice-btn'), function(b){ b.disabled = true; b.style.opacity = (b===btn?1:0.55); });
+        setTimeout(onDone, 1000);
+      });
+      list.appendChild(btn);
+    });
+    wrap.appendChild(list); wrap.appendChild(feedback);
+  }
+  function addAdvChoices(options, onPick){
+    var wrap = document.getElementById('adv-interactive');
+    var list = document.createElement('div'); list.className = 'choice-list';
+    var picked = false;
+    options.forEach(function(opt){
+      var btn = document.createElement('button'); btn.className = 'choice-btn'; btn.textContent = opt.label;
+      btn.addEventListener('click', function(){
+        if(picked) return; picked = true;
+        btn.classList.add('is-correct'); playTone('choice');
+        Array.prototype.forEach.call(list.querySelectorAll('.choice-btn'), function(b){ b.disabled = true; b.style.opacity = (b===btn?1:0.55); });
+        setTimeout(function(){ onPick(opt); }, 700);
+      });
+      list.appendChild(btn);
+    });
+    wrap.appendChild(list);
+  }
+
+  function startAdventure(){ advStats = { honesty:0, kindness:0, courage:0 }; advChapter1(); }
+
+  function advChapter1(){
+    renderAdvShell(1, 'Chapter 1 of 5', 'The Dusty Box',
+      "It's Saturday morning at the Charles family home. While helping tidy the attic, Harry knocks over an old wooden box, and Holiness gasps — inside is a folded, hand-drawn map and a note in curly handwriting: " +
+      "<br><br><b>\"I have cities but no houses, forests but no trees, and water but no fish. What am I?\"</b>");
+    addAdvRiddle(["A map","A globe","A painting"], 0, advChapter2);
+  }
+  function advChapter2(){
+    renderAdvShell(2, 'Chapter 2 of 5', 'A Family Decision',
+      "Under the note lies a real treasure map of the neighbourhood, with a wobbly little X drawn near the old market! Honest wants to be sure they do this properly, Holiness doesn't want anyone left out, and Harry is already tying his shoelaces. What does the family decide?");
+    addAdvChoices([
+      { label:"Tell Father first and ask his blessing before starting.", stat:'honesty', flavor:"Father listens carefully, taps the map thoughtfully, and gives a proud nod. \"Adventure done properly,\" he says, \"is still an adventure.\" " },
+      { label:"Invite Mother too, so no one is left out of the fun.", stat:'kindness', flavor:"Mother's eyes light up when she's invited along, and she ties her headwrap tighter, ready for adventure. \"Now it's a proper family outing,\" she laughs. " },
+      { label:"Grab their shoes and start the hunt right away!", stat:'courage', flavor:"Harry is already at the door before anyone finishes their sentence, and the twins burst out laughing as the whole family hurries after him. " }
+    ], function(opt){ advStats[opt.stat] += 1; advChapter3(opt.flavor); });
+  }
+  function advChapter3(flavor){
+    renderAdvShell(3, 'Chapter 3 of 5', 'Market Day',
+      flavor + "The map leads the family to the bustling neighbourhood market — bright umbrellas, calling voices, and the smell of roasted corn in the air. Squinting at the map, Honest reads the next clue aloud: " +
+      "<br><br><b>\"Find the one who sells something sweet and golden, made by tiny buzzing workers.\"</b>");
+    addAdvRiddle(["The honey seller","The fish seller","The shoe mender"], 0, advChapter4);
+  }
+  function advChapter4(){
+    renderAdvShell(4, 'Chapter 4 of 5', "Mama Nkechi's Request",
+      "Mama Nkechi, the honey seller, laughs warmly when she hears about the treasure hunt. \"I know this game,\" she says. \"I'll trade you the next clue — but first, a little help.\" Her baskets are heavy, a small boy nearby is eyeing the sweets with hungry eyes, and she also asks, gently, whether the children's parents really know where they are. What does the family do?");
+    addAdvChoices([
+      { label:"Harry rolls up his sleeves and helps carry the heavy baskets.", stat:'courage', flavor:"Harry huffs and puffs but grins the whole time, proud to help. Mama Nkechi laughs at his determination. " },
+      { label:"Holiness quietly buys the hungry boy a treat to share.", stat:'kindness', flavor:"Holiness doesn't make a fuss about it — she just quietly makes sure the boy isn't left out. Mama Nkechi notices, and her eyes soften. " },
+      { label:"Honest speaks up and makes sure Mama Nkechi knows Father gave his blessing.", stat:'honesty', flavor:"Honest answers every question plainly and honestly, and Mama Nkechi nods, satisfied. \"A family that tells the truth,\" she says, \"deserves to find what they're looking for.\" " }
+    ], function(opt){ advStats[opt.stat] += 1; advChapter5(opt.flavor); });
+  }
+  function advChapter5(flavor){
+    renderAdvShell(5, 'Chapter 5 of 5', 'Under the Baobab Tree',
+      flavor + "Mama Nkechi points them toward the old baobab tree behind Grandma's house. As the sun turns orange over the rooftops, the whole family kneels together at its roots and digs — until Harry's fingers strike something solid. It's an old tin box, half-buried, waiting.");
+    addAdvContinue('Open the box', showAdvEnding);
+  }
+  function computeAdvEnding(){
+    var h=advStats.honesty, k=advStats.kindness, c=advStats.courage, max=Math.max(h,k,c);
+    var leaders=[]; if(h===max) leaders.push('honesty'); if(k===max) leaders.push('kindness'); if(c===max) leaders.push('courage');
+    return leaders.length>=2 ? 'balanced' : leaders[0];
+  }
+  var ADV_ENDINGS = {
+    honesty: { badge:'📜', title:'The Honest Path', text:"Inside the tin box are old letters — Father wrote them to his own father years ago, all about telling the truth even when it's hard. The family reads them together under the darkening sky. Honest smiles quietly; she always knew the truth was worth the walk." },
+    kindness: { badge:'💛', title:'The Kind Heart', text:"Inside the tin box are faded photographs of the neighbourhood from long ago, tucked beside little notes about small acts of kindness passed down through the family. Holiness holds them gently, as if she already knew what mattered most." },
+    courage: { badge:'🧭', title:'The Brave Explorer', text:"Inside the tin box is a hand-drawn adventure journal — Father's own, from when he was a boy daring himself to explore just a little further. Harry grins from ear to ear; he comes by it honestly." },
+    balanced: { badge:'🌟', title:'The United Family', text:"Inside the tin box is a single folded note, written by Mother and Father on their wedding day and buried here long before any of the children were born: \"To whoever finds this — remember, the greatest treasure isn't gold. It's a family that is honest, kind, and brave, together.\" No one says anything for a moment. They just hold hands under the baobab tree." }
+  };
+  function showAdvEnding(){
+    var key = computeAdvEnding();
+    var ending = ADV_ENDINGS[key];
+    advEndingsFound[key] = true;
+    var foundCount = Object.keys(advEndingsFound).length;
+    advPage.innerHTML =
+      '<div class="ending-badge">'+ending.badge+'</div>' +
+      '<h2 class="ending-title">'+ending.title+'</h2>' +
+      '<div class="ending-sub">A Charles Family Ending</div>' +
+      '<div class="story-text" style="text-align:center;">'+ending.text+'</div>' +
+      '<div class="ending-actions">' +
+        '<button class="cta-btn" id="replay-btn">Play Again</button>' +
+        '<button class="ghost-btn" id="adv-home-btn">Story Library</button>' +
+      '</div>' +
+      '<div class="discovered">Endings discovered: '+foundCount+' / 4 — try different choices to find them all!</div>';
+    setAdvProgress(5,5);
+    confettiBurst(advPage, key==='balanced' ? 34 : 24);
+    playTone('correct');
+    document.getElementById('replay-btn').addEventListener('click', startAdventure);
+    document.getElementById('adv-home-btn').addEventListener('click', showLibrary);
+  }
+
+})();
+</script>
+</body>
+</html>
